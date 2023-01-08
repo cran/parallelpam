@@ -1,13 +1,13 @@
-b3c910f1583c4c2802059c6952ac3e51 *DESCRIPTION
+35c8a7cc4ab4b2dbbbca1a4699ac45b0 *DESCRIPTION
 b6bc3eada1e99aed2a72cbda7d8e9a95 *NAMESPACE
 504cbe537984984663acb205ef1ef0ac *R/RcppExports.R
 77e6362a75f389e404042324199ef56e *build/vignette.rds
 d19393ea7baee5dcdcd542a8b8dea085 *inst/doc/jmatrixpp.R
 434c1cc1c07f512bdbf057887f7ab932 *inst/doc/jmatrixpp.Rmd
-b6c6de639ee7c9fe40a94f264e1de4a9 *inst/doc/jmatrixpp.html
+eb13282b4a612f5520d3399dc43f52f5 *inst/doc/jmatrixpp.html
 17458e4e54c70d9dc79454b51b29964b *inst/doc/parallelpam.R
 382e71ffe2a2c2f350525281de2cb48b *inst/doc/parallelpam.Rmd
-dac6995e2ede589f67bfb9faad8e2d32 *inst/doc/parallelpam.html
+ad23fffc2af07cbe612062bb461c4319 *inst/doc/parallelpam.html
 3ac15e1a60a0f6cabac5f8c73aa9bccd *inst/include/debugpar.h
 b7d4e487db41a240fb821aff1681524c *inst/include/diftimehelper.h
 eb95da38fc3e8bee2f6f4482db71ab59 *inst/include/dissimmat.h
