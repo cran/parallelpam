@@ -9,7 +9,7 @@ GetJManyRowsByNames(fname, extrownames)
 \arguments{
 \item{fname}{String with the file name that contains the binary data.}
 
-\item{extrownames}{A numeric vector with the names of the rows to be extracted. If the binary file has no row names, or _any_ of the row names is not present, an empty matrix is returned.}
+\item{extrownames}{A vector of RStrings with the names of the rows to be extracted. If the binary file has no row names, or _any_ of the row names is not present, an empty matrix is returned.}
 }
 \value{
 A numeric matrix with the values of elements in the requested rows
@@ -21,9 +21,9 @@ Returns (as a R numeric matrix) the rows with the requested row names from the m
 Rf <- matrix(runif(48),nrow=6)
 rownames(Rf) <- c("A","B","C","D","E","F")
 colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 Rf[c("A","C"),]
-vf<-GetJManyRowsByNames("Rfullfloat.bin",c("A","C"))
+vf<-GetJManyRowsByNames(tmpfile1,c("A","C"))
 vf
-file.remove("Rfullfloat.bin")
 }

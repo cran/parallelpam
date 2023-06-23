@@ -11,10 +11,10 @@ NumSilToClusterSil(cl, s)
 This function takes something like the L$clasif array which is the second element of the list returned by ApplyPAM}
 
 \item{s}{The numeric value of the silhouette for each point, with points in the same order as they appear in cl.\cr
-This is the vector returned by after a call to CalculateSilhouette with the same value of parameter cl.}
+This is the vector returned by a call to CalculateSilhouette with the same value of parameter cl.}
 }
 \value{
-sp       A silhouette in the format of the cluster package which is a NumericMatrix of as many rows as points and three columns: cluster, neighbor and sil_width.\cr
+sp       A silhouette in the format of the cluster package which is a NumericMatrix with as many rows as points and three columns: cluster, neighbor and sil_width.\cr
                  Its structure and dimension names are as in package 'cluster', which allows to use it with the silhouette plotting functions of such package\cr
                  This means you can do library(cluster) followed by plot(NumSilToClusterSil(cl,s)) to get a beatiful plot.
 }
@@ -35,12 +35,13 @@ for (i in (1:10))
   M[10*(i-1)+k,]=p+Rf[k,]
  }
 }
-JWriteBin(M,"pamtest.bin",dtype="float",dmtype="full")
-CalcAndWriteDissimilarityMatrix("pamtest.bin","pamDL2.bin",distype="L2",restype="float",nthreads=0)
-L <- ApplyPAM("pamDL2.bin",10,init_method="BUILD")
-sil <- CalculateSilhouette(L$clasif,"pamDL2.bin")
+tmpfile1=paste0(tempdir(),"/pamtest.bin")
+JWriteBin(M,tmpfile1,dtype="float",dmtype="full")
+tmpdisfile1=paste0(tempdir(),"/pamDL2.bin")
+CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",restype="float",nthreads=0)
+L <- ApplyPAM(tmpdisfile1,10,init_method="BUILD")
+sil <- CalculateSilhouette(L$clasif,tmpdisfile1)
 sp <- NumSilToClusterSil(L$clasif,sil)
-# Here you can install and load package cluster and make plot(sp)
-file.remove("pamtest.bin")
-file.remove("pamDL2.bin")
+library(cluster)
+plot(sp)
 }

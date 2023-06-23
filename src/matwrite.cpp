@@ -162,8 +162,8 @@ void WriteRMatrixAsBin(unsigned char mtype,std::string fname,Rcpp::NumericMatrix
 //' Rf <- matrix(runif(48),nrow=6)
 //' rownames(Rf) <- c("A","B","C","D","E","F")
 //' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-//' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-//' file.remove("Rfullfloat.bin")
+//' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+//' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 //' @export
 // [[Rcpp::export]]
 void JWriteBin(Rcpp::NumericMatrix M,std::string fname,std::string dtype="float",std::string dmtype="full",std::string comment="")

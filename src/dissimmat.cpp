@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2022 Juan Domingo (Juan.Domingo@uv.es)
+ * Copyright (C) 2023 Juan Domingo (Juan.Domingo@uv.es)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,55 +22,59 @@ extern unsigned char DEB;
 
 //' CalcAndWriteDissimilarityMatrix
 //'
-//' Writes a binary symmetric matrix with the dissimilarities between ROWS of the data stored in a binary matrix in the scellpam package format.\cr
-//' Notice that, differently from the common practice in single cell, the rows represent cells. This is for efficiency reasons and it is transparent
-//' to the user, as long as he/she has generated the binary matrix (with CsvToBinMat, dgCMatToBinMat or SceToBinMat) using the option transpose=TRUE.\cr
-//' The input matrix of vectors can be a full or a sparse matrix. Output matrix type can be float or double type (but look at the comments in 'Details').
+//' Writes a binary symmetric matrix with the dissimilarities between ROWS of the data stored in a binary matrix in the jmatrix/parallelpam package format.\cr
+//' The input matrix of vectors can be a full or a sparse matrix and the algorithm has been modified to calculate faster for sparse matrices.\cr
+//' Output matrix type can be float or double type (but look at the comments in 'Details').
 //'
-//' The parameter restype forces the output to be a matrix of either floats or doubles. Precision of float if normally good enough; but if you need
+//' The parameter restype forces the output to be a matrix of either floats or doubles. Precision of float is normally good enough; but if you need
 //' double precision (may be because you expect your results to be in a large range, two to three orders of magnitude), change it.\cr
 //' Nevertheless, notice that this at the expense of double memory usage, which is QUADRATIC with the number of individuals (rows) in your input matrix.
 //'
-//' @param ifname   A string with the name of the file containing the counts as a binary matrix, as written by CsvToBinMat, dgCMatToBinMat or SceToBinMat
+//' @param ifname   A string with the name of the file containing the counts as a binary matrix.
 //' @param ofname   A string with the name of the binary output file to contain the symmetric dissimilarity matrix.
-//' @param distype  The dissimilarity to be calculated. It must be one of these strings: 'L1', 'L2' or 'Pearson'.\cr
+//' @param distype  The dissimilarity to be calculated. It must be one of these strings: 'L1', 'L2', 'Pearson', 'Cos' or 'WEuc'.\cr
+//'                 Respectively: L1 (Manhattan), L2 (Euclidean), Pearson (Pearson dissimilarity), Cos (cosine distance), WEuc (weigthed Euclidean, with inverse-stdevs as weights).\cr
 //'                 Default: 'L2'.
 //' @param restype  The data type of the result. It can be one of the strings 'float' or 'double'. Default: float (and don't change it unless you REALLY need to...).
 //' @param comment  Comment to be added to the dissimilary matrix. Default: "" (no comment)
 //' @param nthreads Number of threads to be used for the parallel calculations with this meaning:\cr
 //'                 -1: don't use threads.\cr
-//'                  0: let the function choose according to the number of individuals (cells) and to the number of available cores.\cr
+//'                  0: let the function choose according to the number of rows and to the number of available cores.\cr
 //'                  Any possitive number > 1: use that number of threads. You can use even more than cores, but this is discouraged and raises a warning.\cr
 //'                 Default: 0.
 //' @return   No return value, called for side effects (creates a file)
 //' @examples
 //' Rf <- matrix(runif(50000),nrow=100)
-//' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",
+//' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+//' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",
 //'           comment="Full matrix of floats, 100 rows, 500 columns")
-//' JMatInfo("Rfullfloat.bin")
-//' CalcAndWriteDissimilarityMatrix("Rfullfloat.bin","RfullfloatDis.bin",distype="L2",
-//'                         restype="float",comment="L2 distance matrix from full",nthreads=0)
-//' JMatInfo("RfullfloatDis.bin")
-//' JWriteBin(Rf,"Rsparsefloat.bin",dtype="float",dmtype="sparse",
-//'                         comment="Sparse matrix of floats, 100 rows, 500 columns")
-//' JMatInfo("Rsparsefloat.bin")
-//' CalcAndWriteDissimilarityMatrix("Rsparsefloat.bin","RsparsefloatDis.bin",distype="L2",
-//'                         restype="float",comment="L2 distance matrix from sparse",nthreads=0)
-//' JMatInfo("RsparsefloatDis.bin")
-//' Dfu<-GetJManyRows("RfullfloatDis.bin",c(1:nrow(Rf)))
-//' Dsp<-GetJManyRows("RsparsefloatDis.bin",c(1:nrow(Rf)))
+//' JMatInfo(tmpfile1)
+//' tmpdisfile1=paste0(tempdir(),"/RfullfloatDis.bin")
+//' # Distance file calculated from the matrix stored as full
+//' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",
+//'                          restype="float",comment="L2 distance matrix from full",nthreads=0)
+//' JMatInfo(tmpdisfile1)
+//' tmpfile2=paste0(tempdir(),"/Rsparsefloat.bin")
+//' JWriteBin(Rf,tmpfile2,dtype="float",dmtype="sparse",
+//'                          comment="Sparse matrix of floats, 100 rows, 500 columns")
+//' JMatInfo(tmpfile2)
+//' # Distance file calculated from the matrix stored as sparse
+//' tmpdisfile2=paste0(tempdir(),"/RsparsefloatDis.bin")
+//' CalcAndWriteDissimilarityMatrix(tmpfile2,tmpdisfile2,distype="L2",
+//'                          restype="float",comment="L2 distance matrix from sparse",nthreads=0)
+//' JMatInfo(tmpdisfile2)
+//' # Read both versions
+//' Dfu<-GetJManyRows(tmpdisfile1,c(1:nrow(Rf)))
+//' Dsp<-GetJManyRows(tmpdisfile2,c(1:nrow(Rf)))
+//' # and compare them
 //' max(Dfu-Dsp)
-//' file.remove("Rfullfloat.bin")
-//' file.remove("Rsparsefloat.bin")
-//' file.remove("RfullfloatDis.bin")
-//' file.remove("RsparsefloatDis.bin")
 //' @export
 // [[Rcpp::export]]
 void CalcAndWriteDissimilarityMatrix(std::string ifname, std::string ofname, std::string distype="L2", std::string restype="float", std::string comment="",int nthreads=0)
 {
- if ((distype != "L1") && (distype != "L2") && (distype != "Pearson"))
+ if ((distype != "L1") && (distype != "L2") && (distype != "Pearson") && (distype != "Cos") && (distype != "WEuc"))
  {
-  Rcpp::stop("Parameter distype must be one of 'L1', 'L2' or 'Pearson'.\n");
+  Rcpp::stop("Parameter distype must be one of 'L1', 'L2', 'Pearson', 'Cos' or 'WEuc'.\n");
   return;
  }
  if ((restype != "float") && (restype != "double"))
@@ -85,6 +89,10 @@ void CalcAndWriteDissimilarityMatrix(std::string ifname, std::string ofname, std
   dtype=DL2;
  if (distype=="Pearson")
   dtype=DPe;
+ if (distype=="Cos")
+  dtype=DCo;
+ if (distype=="WEuc")
+  dtype=DWe; 
   
  unsigned char mt,ct,e,md;
  indextype nr,nc;

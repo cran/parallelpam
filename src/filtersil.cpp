@@ -379,22 +379,22 @@ void FilterDissim(std::string ifname,std::string ofname,unsigned char mdinfo,std
 //' FilterBySilhouetteQuantile
 //'
 //' Takes a silhouette, as returned by CalculateSilhouette, the list of medoids and class assignments, as returned by ApplyPam,
-//' a quantile and the matrices of counts and dissimilarities and constructs the corresponding matrices clearing off the points whose silhoutte is
+//' a quantile and the matrices of values and dissimilarities and constructs the corresponding matrices clearing off the points whose silhoutte is
 //' below the lower quantile, except if they are medoids.\cr
 //'
 //' The renumbering of indices in the returned cluster may seem confusing at first but it was the way of fitting this with the rest
 //' of the package. Anyway, notice that if the numeric vectors in the input parameter L were named vectors, the point names are appropriately kept
-//' in the result so point identity is preserved. Moreover, if the counts and dissimilarity input matrices had row and/or column names, they
+//' in the result so point identity is preserved. Moreover, if the values and dissimilarity input matrices had row and/or column names, they
 //' are preserved in the filtered matrices, too.
 //' 
 //' @param s          A numeric vector with the sihouette coefficient of each point in a classification, as returned by CalculateSilhouette.
 //' @param L          A list of two numeric vectors, L$med and L$clasif, obtained normally as the object returned by ApplyPAM.
-//' @param fallcounts A string with the name of the binary file containing the matrix of individuals. It can be either a full or a sparse matrix.
-//' @param ffilcounts A string with the name of the binary file that will contain the selected individuals. It will have the same character (full/sparse) and type of the complete file.
-//' @param falldissim A string with the name of the binary file containing the dissimilarity matrix of the complete set of individuals. It must be a symmetric matrix of floats.
-//' @param ffildissim A string with the name of the binary file that will contain  the dissimilarity matrix for the remaining individuals. It will be a symmetric matrix of floats.
+//' @param fallcounts A string with the name of the binary file containing the matrix of data per point. It can be either a full or a sparse matrix.
+//' @param ffilcounts A string with the name of the binary file that will contain the selected points. It will have the same character (full/sparse) and type of the complete file.
+//' @param falldissim A string with the name of the binary file containing the dissimilarity matrix of the complete set of points. It must be a symmetric matrix.
+//' @param ffildissim A string with the name of the binary file that will contain  the dissimilarity matrix for the remaining points. It will be a symmetric matrix of.
 //' @param q          Quantile to filter. All points whose silhouette is below this quantile will be filtered out. Default: 0.2
-//' @param addcom     Boolean to indicate if a comment must be appended to the current comment of counts and dissimilarity matrices to indicate that they are the result of a filtering process. This comment is automatically generated and contains the value of quantile q. Succesive applications add comments at the end of those already present. Default: TRUE
+//' @param addcom     Boolean to indicate if a comment must be appended to the current comment of values and dissimilarity matrices to indicate that they are the result of a filtering process. This comment is automatically generated and contains the value of quantile q. Succesive applications add comments at the end of those already present. Default: TRUE
 //' @return Lr["med","clasif"] A list of two numeric vectors.\cr
 //'                      Lr$med is a modification of the correponding first element of the passed L parameter.\cr
 //'                      Lr$clasif has as many components as remaining instances.\cr
@@ -416,20 +416,20 @@ void FilterDissim(std::string ifname,std::string ofname,unsigned char mdinfo,std
 //'   M[10*(i-1)+k,]=p+Rf[k,]
 //'  }
 //' }
-//' JWriteBin(M,"pamtest.bin",dtype="float",dmtype="full")
-//' CalcAndWriteDissimilarityMatrix("pamtest.bin","pamDL2.bin",distype="L2",restype="float",nthreads=0)
-//' L <- ApplyPAM("pamDL2.bin",10,init_method="BUILD")
+//' tmpfile1=paste0(tempdir(),"/pamtest.bin")
+//' JWriteBin(M,tmpfile1,dtype="float",dmtype="full")
+//' tmpdisfile1=paste0(tempdir(),"/pamDl2.bin")
+//' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",restype="float",nthreads=0)
+//' L <- ApplyPAM(tmpdisfile1,10,init_method="BUILD")
 //' # Which are the medoids
 //' L$med
-//' sil <- CalculateSilhouette(L$clasif,"pamDL2.bin")
-//' Lf<-FilterBySilhouetteQuantile(sil,L,"pamtest.bin","pamtestfilt.bin","pamDL2.bin","pamDL2filt.bin",
+//' sil <- CalculateSilhouette(L$clasif,tmpdisfile1)
+//' tmpfiltfile1=paste0(tempdir(),"/pamtestfilt.bin")
+//' tmpfiltdisfile1=paste0(tempdir(),"/pamDL2filt.bin")
+//' Lf<-FilterBySilhouetteQuantile(sil,L,tmpfile1,tmpfiltfile1,tmpdisfile1,tmpfiltdisfile1,
 //'                                q=0.4,addcom=TRUE)
 //' # The new medoids are the same points but renumbered, since the L$clasif array has less points
 //' Lf$med
-//' file.remove("pamtest.bin")
-//' file.remove("pamDL2.bin")
-//' file.remove("pamtestfilt.bin")
-//' file.remove("pamDL2filt.bin")
 //' @export
 // [[Rcpp::export]]
 Rcpp::List FilterBySilhouetteQuantile(Rcpp::NumericVector s, Rcpp::List L,std::string fallcounts, std::string ffilcounts, std::string falldissim, std::string ffildissim, float q=0.2,bool addcom=true)
@@ -502,22 +502,22 @@ Rcpp::List FilterBySilhouetteQuantile(Rcpp::NumericVector s, Rcpp::List L,std::s
 //' FilterBySilhouetteThreshold
 //'
 //' Takes a silhouette, as returned by CalculateSilhouette, the list of medoids and class assignments, as returned by ApplyPam,
-//' a threshold and the matrices of counts and dissimilarities and constructs the corresponding matrices clearing off the points whose silhoutte is
+//' a threshold and the matrices of values and dissimilarities and constructs the corresponding matrices clearing off the points whose silhoutte is
 //' below the threshold, except if they are medoids.\cr
 //'
 //' The renumbering of indices in the returned cluster may seem confusing at first but it was the way of fitting this with the rest
 //' of the package. Anyway, notice that if the numeric vectors in the input parameter L were named vectors, the point names are appropriately kept
-//' in the result so point identity is preserved. Moreover, if the individuals and dissimilarity input matrices had row and/or column names, they
+//' in the result so point identity is preserved. Moreover, if the values and dissimilarity input matrices had row and/or column names, they
 //' are preserved in the filtered matrices, too.
 //' 
 //' @param s          A numeric vector with the sihouette coefficient of each point in a classification, as returned by CalculateSilhouette.
 //' @param L          A list of two numeric vectors, L$med and L$clasif, obtained normally as the object returned by ApplyPAM.
-//' @param fallcounts A string with the name of the binary file containing the matrix of counts per individuals. It can be either a full or a sparse matrix.
-//' @param ffilcounts A string with the name of the binary file that will contain the selected individuals. It will have the same character (full/sparse) and type of the complete file.
-//' @param falldissim A string with the name of the binary file containing the dissimilarity matrix of the complete set of individuals. It must be a symmetric matrix of floats.
-//' @param ffildissim A string with the name of the binary file that will contain  the dissimilarity matrix for the remaining individuals. It will be a symmetric matrix of floats.
+//' @param fallcounts A string with the name of the binary file containing the matrix of values per point. It can be either a full or a sparse matrix.
+//' @param ffilcounts A string with the name of the binary file that will contain the selected points. It will have the same character (full/sparse) and type of the complete file.
+//' @param falldissim A string with the name of the binary file containing the dissimilarity matrix of the complete set of points. It must be a symmetric matrix.
+//' @param ffildissim A string with the name of the binary file that will contain  the dissimilarity matrix for the remaining points. It will be a symmetric matrix.
 //' @param thres      Threshold to filter. All points whose silhouette is below this threshold will be filtered out. Default: 0.0 (remember that silhouette is in [-1..1])
-//' @param addcom     Boolean to indicate if a comment must be appended to the current comment of counts and dissimilarity matrices to indicate that they are the result of a filtering process. This comment is automatically generated and contains the value of threshold t. Succesive applications add comments at the end of those already present. Default: TRUE
+//' @param addcom     Boolean to indicate if a comment must be appended to the current comment of values and dissimilarity matrices to indicate that they are the result of a filtering process. This comment is automatically generated and contains the value of threshold t. Succesive applications add comments at the end of those already present. Default: TRUE
 //' @return Lr["med","clasif"] A list of two numeric vectors.\cr
 //'                      Lr$med is a modification of the correponding first element of the passed L parameter.\cr
 //'                      Lr$clasif has as many components as remaining instances.\cr
@@ -539,20 +539,20 @@ Rcpp::List FilterBySilhouetteQuantile(Rcpp::NumericVector s, Rcpp::List L,std::s
 //'   M[10*(i-1)+k,]=p+Rf[k,]
 //'  }
 //' }
-//' JWriteBin(M,"pamtest.bin",dtype="float",dmtype="full")
-//' CalcAndWriteDissimilarityMatrix("pamtest.bin","pamDL2.bin",distype="L2",restype="float",nthreads=0)
-//' L <- ApplyPAM("pamDL2.bin",10,init_method="BUILD")
+//' tmpfile1=paste0(tempdir(),"/pamtest.bin")
+//' JWriteBin(M,tmpfile1,dtype="float",dmtype="full")
+//' tmpdisfile1=paste0(tempdir(),"/pamDl2.bin")
+//' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",restype="float",nthreads=0)
+//' L <- ApplyPAM(tmpdisfile1,10,init_method="BUILD")
 //' # Which are the medoids
 //' L$med
-//' sil <- CalculateSilhouette(L$clasif,"pamDL2.bin")
-//' Lf<-FilterBySilhouetteQuantile(sil,L,"pamtest.bin","pamtestfilt.bin","pamDL2.bin","pamDL2filt.bin",
-//'                                 q=0.4,addcom=TRUE)
+//' sil <- CalculateSilhouette(L$clasif,tmpdisfile1)
+//' tmpfiltfile1=paste0(tempdir(),"/pamtestfilt.bin")
+//' tmpfiltdisfile1=paste0(tempdir(),"/pamDL2filt.bin")
+//' Lf<-FilterBySilhouetteThreshold(sil,L,tmpfile1,tmpfiltfile1,tmpdisfile1,tmpfiltdisfile1,
+//'                                thres=0.4,addcom=TRUE)
 //' # The new medoids are the same points but renumbered, since the L$clasif array has less points
 //' Lf$med
-//' file.remove("pamtest.bin")
-//' file.remove("pamDL2.bin")
-//' file.remove("pamtestfilt.bin")
-//' file.remove("pamDL2filt.bin")
 //' @export
 // [[Rcpp::export]]
 Rcpp::List FilterBySilhouetteThreshold(Rcpp::NumericVector s, Rcpp::List L,std::string fallcounts, std::string ffilcounts, std::string falldissim, std::string ffildissim, float thres=0.0,bool addcom=true)

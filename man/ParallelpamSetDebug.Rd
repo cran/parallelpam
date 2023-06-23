@@ -7,7 +7,7 @@
 ParallelpamSetDebug(deb = TRUE, debjmat = FALSE)
 }
 \arguments{
-\item{deb}{boolean, TRUE to generate debug messages for the PAM algorithm and FALSE to turn them off. Default: true.}
+\item{deb}{boolean, TRUE to generate debug messages for the PAM algorithm and silhouette calculation and FALSE to turn them off. Default: true.}
 
 \item{debjmat}{boolean, TRUE to generate debug messages for the jmatrix part inside this package and FALSE to turn them off. Default: false}
 }

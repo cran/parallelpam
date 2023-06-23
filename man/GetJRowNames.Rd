@@ -19,8 +19,8 @@ Returns a R StringVector with the row names of a matrix stored in the binary for
 Rf <- matrix(runif(48),nrow=6)
 rownames(Rf) <- c("A","B","C","D","E","F")
 colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-rn<-GetJRowNames("Rfullfloat.bin")
+tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
+rn<-GetJRowNames(tmpfile1)
 rn
-file.remove("Rfullfloat.bin")
 }

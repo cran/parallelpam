@@ -45,9 +45,9 @@ extern unsigned char DEB;
 //' Rf <- matrix(runif(48),nrow=6)
 //' rownames(Rf) <- c("A","B","C","D","E","F")
 //' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-//' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-//' JMatInfo("Rfullfloat.bin")
-//' file.remove("Rfullfloat.bin")
+//' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+//' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
+//' JMatInfo(tmpfile1)
 //' @export
 // [[Rcpp::export]]
 void JMatInfo(std::string fname, std::string fres = "")
@@ -142,9 +142,9 @@ void JMatInfo(std::string fname, std::string fres = "")
   
  if (mtype==MTYPESPARSE)
  {
-     unsigned long long full_size=nrows*ncols*SizeOfType(ctype);
+     unsigned long long full_size=(unsigned long long)nrows*(unsigned long long)ncols*SizeOfType(ctype);
      unsigned long long used_size=start_metadata-HEADER_SIZE;
-     out << "Binary data size:   " <<  used_size << " bytes, which is " << 100.0*float(used_size)/float(full_size) << "% of the full matrix size.\n";
+     out << "Binary data size:   " <<  used_size << " bytes, which is " << 100.0*float(used_size)/float(full_size) << "% of the full matrix size (which would be " << full_size  << " bytes).\n";
  }
  
  if (fres != "")

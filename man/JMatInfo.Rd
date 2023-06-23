@@ -21,7 +21,7 @@ Shows in the screen or writes to a file information about a matrix stored in the
 Rf <- matrix(runif(48),nrow=6)
 rownames(Rf) <- c("A","B","C","D","E","F")
 colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-JMatInfo("Rfullfloat.bin")
-file.remove("Rfullfloat.bin")
+tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
+JMatInfo(tmpfile1)
 }

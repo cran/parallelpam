@@ -21,9 +21,9 @@ Returns (as a R numeric vector) the requested column number from the matrix cont
 Rf <- matrix(runif(48),nrow=6)
 rownames(Rf) <- c("A","B","C","D","E","F")
 colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 Rf[,3]
-vf<-GetJCol("Rfullfloat.bin",3)
+vf<-GetJCol(tmpfile1,3)
 vf
-file.remove("Rfullfloat.bin")
 }

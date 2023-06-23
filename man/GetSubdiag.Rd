@@ -21,9 +21,9 @@ Rns <- matrix(runif(49),nrow=7)
 Rsym <- 0.5*(Rns+t(Rns))
 rownames(Rsym) <- c("A","B","C","D","E","F","G")
 colnames(Rsym) <- c("a","b","c","d","e","f","g")
-JWriteBin(Rsym,"Rsymfloat.bin",dtype="float",dmtype="symmetric")
-d<-GetSubdiag("Rsymfloat.bin")
+tmpfile1=paste0(tempdir(),"/Rsymfloat.bin")
+JWriteBin(Rsym,tmpfile1,dtype="float",dmtype="symmetric")
+d<-GetSubdiag(tmpfile1)
 Rsym
 d
-file.remove("Rsymfloat.bin")
 }

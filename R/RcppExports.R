@@ -10,7 +10,7 @@ NULL
 #' On package load the default status is OFF.\cr
 #' Setting debugging of any part to ON shows a message. Setting to OFF does not show anything (since debugging is OFF...)
 #'
-#' @param deb     boolean, TRUE to generate debug messages for the PAM algorithm and FALSE to turn them off. Default: true.
+#' @param deb     boolean, TRUE to generate debug messages for the PAM algorithm and silhouette calculation and FALSE to turn them off. Default: true.
 #' @param debjmat boolean, TRUE to generate debug messages for the jmatrix part inside this package and FALSE to turn them off. Default: false
 #' @return        No return value, called for side effects (internal boolean flag changed)
 #' @examples
@@ -24,47 +24,51 @@ ParallelpamSetDebug <- function(deb = TRUE, debjmat = FALSE) {
 #' CalcAndWriteDissimilarityMatrix
 #'
 #' Writes a binary symmetric matrix with the dissimilarities between ROWS of the data stored in a binary matrix in the scellpam package format.\cr
-#' Notice that, differently from the common practice in single cell, the rows represent cells. This is for efficiency reasons and it is transparent
-#' to the user, as long as he/she has generated the binary matrix (with CsvToBinMat, dgCMatToBinMat or SceToBinMat) using the option transpose=TRUE.\cr
-#' The input matrix of vectors can be a full or a sparse matrix. Output matrix type can be float or double type (but look at the comments in 'Details').
+#' The input matrix of vectors can be a full or a sparse matrix and the algorithm has been modified to calculate faster for sparse matrices.\cr
+#' Output matrix type can be float or double type (but look at the comments in 'Details').
 #'
 #' The parameter restype forces the output to be a matrix of either floats or doubles. Precision of float if normally good enough; but if you need
 #' double precision (may be because you expect your results to be in a large range, two to three orders of magnitude), change it.\cr
 #' Nevertheless, notice that this at the expense of double memory usage, which is QUADRATIC with the number of individuals (rows) in your input matrix.
 #'
-#' @param ifname   A string with the name of the file containing the counts as a binary matrix, as written by CsvToBinMat, dgCMatToBinMat or SceToBinMat
+#' @param ifname   A string with the name of the file containing the counts as a binary matrix.
 #' @param ofname   A string with the name of the binary output file to contain the symmetric dissimilarity matrix.
-#' @param distype  The dissimilarity to be calculated. It must be one of these strings: 'L1', 'L2' or 'Pearson'.\cr
+#' @param distype  The dissimilarity to be calculated. It must be one of these strings: 'L1', 'L2', 'Pearson', 'Cos' or 'WEuc'.\cr
+#'                 Respectively: L1 (Manhattan), L2 (Euclidean), Pearson (Pearson dissimilarity), Cos (cosine distance), WEuc (weigthed Euclidean, with inverse-variances as weights).\cr
 #'                 Default: 'L2'.
 #' @param restype  The data type of the result. It can be one of the strings 'float' or 'double'. Default: float (and don't change it unless you REALLY need to...).
 #' @param comment  Comment to be added to the dissimilary matrix. Default: "" (no comment)
 #' @param nthreads Number of threads to be used for the parallel calculations with this meaning:\cr
 #'                 -1: don't use threads.\cr
-#'                  0: let the function choose according to the number of individuals (cells) and to the number of available cores.\cr
+#'                  0: let the function choose according to the number of rows and to the number of available cores.\cr
 #'                  Any possitive number > 1: use that number of threads. You can use even more than cores, but this is discouraged and raises a warning.\cr
 #'                 Default: 0.
 #' @return   No return value, called for side effects (creates a file)
 #' @examples
 #' Rf <- matrix(runif(50000),nrow=100)
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",
 #'           comment="Full matrix of floats, 100 rows, 500 columns")
-#' JMatInfo("Rfullfloat.bin")
-#' CalcAndWriteDissimilarityMatrix("Rfullfloat.bin","RfullfloatDis.bin",distype="L2",
-#'                         restype="float",comment="L2 distance matrix from full",nthreads=0)
-#' JMatInfo("RfullfloatDis.bin")
-#' JWriteBin(Rf,"Rsparsefloat.bin",dtype="float",dmtype="sparse",
-#'                         comment="Sparse matrix of floats, 100 rows, 500 columns")
-#' JMatInfo("Rsparsefloat.bin")
-#' CalcAndWriteDissimilarityMatrix("Rsparsefloat.bin","RsparsefloatDis.bin",distype="L2",
-#'                         restype="float",comment="L2 distance matrix from sparse",nthreads=0)
-#' JMatInfo("RsparsefloatDis.bin")
-#' Dfu<-GetJManyRows("RfullfloatDis.bin",c(1:nrow(Rf)))
-#' Dsp<-GetJManyRows("RsparsefloatDis.bin",c(1:nrow(Rf)))
+#' JMatInfo(tmpfile1)
+#' tmpdisfile1=paste0(tempdir(),"/RfullfloatDis.bin")
+#' # Distance file calculated from the matrix stored as full
+#' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",
+#'                          restype="float",comment="L2 distance matrix from full",nthreads=0)
+#' JMatInfo(tmpdisfile1)
+#' tmpfile2=paste0(tempdir(),"/Rsparsefloat.bin")
+#' JWriteBin(Rf,tmpfile2,dtype="float",dmtype="sparse",
+#'                          comment="Sparse matrix of floats, 100 rows, 500 columns")
+#' JMatInfo(tmpfile2)
+#' # Distance file calculated from the matrix stored as sparse
+#' tmpdisfile2=paste0(tempdir(),"/RsparsefloatDis.bin")
+#' CalcAndWriteDissimilarityMatrix(tmpfile2,tmpdisfile2,distype="L2",
+#'                          restype="float",comment="L2 distance matrix from sparse",nthreads=0)
+#' JMatInfo(tmpdisfile2)
+#' # Read both versions
+#' Dfu<-GetJManyRows(tmpdisfile1,c(1:nrow(Rf)))
+#' Dsp<-GetJManyRows(tmpdisfile2,c(1:nrow(Rf)))
+#' # and compare them
 #' max(Dfu-Dsp)
-#' file.remove("Rfullfloat.bin")
-#' file.remove("Rsparsefloat.bin")
-#' file.remove("RfullfloatDis.bin")
-#' file.remove("RsparsefloatDis.bin")
 #' @export
 CalcAndWriteDissimilarityMatrix <- function(ifname, ofname, distype = "L2", restype = "float", comment = "", nthreads = 0L) {
     invisible(.Call(`_parallelpam_CalcAndWriteDissimilarityMatrix`, ifname, ofname, distype, restype, comment, nthreads))
@@ -73,22 +77,22 @@ CalcAndWriteDissimilarityMatrix <- function(ifname, ofname, distype = "L2", rest
 #' FilterBySilhouetteQuantile
 #'
 #' Takes a silhouette, as returned by CalculateSilhouette, the list of medoids and class assignments, as returned by ApplyPam,
-#' a quantile and the matrices of counts and dissimilarities and constructs the corresponding matrices clearing off the points whose silhoutte is
+#' a quantile and the matrices of values and dissimilarities and constructs the corresponding matrices clearing off the points whose silhoutte is
 #' below the lower quantile, except if they are medoids.\cr
 #'
 #' The renumbering of indices in the returned cluster may seem confusing at first but it was the way of fitting this with the rest
 #' of the package. Anyway, notice that if the numeric vectors in the input parameter L were named vectors, the point names are appropriately kept
-#' in the result so point identity is preserved. Moreover, if the counts and dissimilarity input matrices had row and/or column names, they
+#' in the result so point identity is preserved. Moreover, if the values and dissimilarity input matrices had row and/or column names, they
 #' are preserved in the filtered matrices, too.
 #' 
 #' @param s          A numeric vector with the sihouette coefficient of each point in a classification, as returned by CalculateSilhouette.
 #' @param L          A list of two numeric vectors, L$med and L$clasif, obtained normally as the object returned by ApplyPAM.
-#' @param fallcounts A string with the name of the binary file containing the matrix of individuals. It can be either a full or a sparse matrix.
-#' @param ffilcounts A string with the name of the binary file that will contain the selected individuals. It will have the same character (full/sparse) and type of the complete file.
-#' @param falldissim A string with the name of the binary file containing the dissimilarity matrix of the complete set of individuals. It must be a symmetric matrix of floats.
-#' @param ffildissim A string with the name of the binary file that will contain  the dissimilarity matrix for the remaining individuals. It will be a symmetric matrix of floats.
+#' @param fallcounts A string with the name of the binary file containing the matrix of data per point. It can be either a full or a sparse matrix.
+#' @param ffilcounts A string with the name of the binary file that will contain the selected points. It will have the same character (full/sparse) and type of the complete file.
+#' @param falldissim A string with the name of the binary file containing the dissimilarity matrix of the complete set of points. It must be a symmetric matrix.
+#' @param ffildissim A string with the name of the binary file that will contain  the dissimilarity matrix for the remaining points. It will be a symmetric matrix of.
 #' @param q          Quantile to filter. All points whose silhouette is below this quantile will be filtered out. Default: 0.2
-#' @param addcom     Boolean to indicate if a comment must be appended to the current comment of counts and dissimilarity matrices to indicate that they are the result of a filtering process. This comment is automatically generated and contains the value of quantile q. Succesive applications add comments at the end of those already present. Default: TRUE
+#' @param addcom     Boolean to indicate if a comment must be appended to the current comment of values and dissimilarity matrices to indicate that they are the result of a filtering process. This comment is automatically generated and contains the value of quantile q. Succesive applications add comments at the end of those already present. Default: TRUE
 #' @return Lr["med","clasif"] A list of two numeric vectors.\cr
 #'                      Lr$med is a modification of the correponding first element of the passed L parameter.\cr
 #'                      Lr$clasif has as many components as remaining instances.\cr
@@ -110,20 +114,20 @@ CalcAndWriteDissimilarityMatrix <- function(ifname, ofname, distype = "L2", rest
 #'   M[10*(i-1)+k,]=p+Rf[k,]
 #'  }
 #' }
-#' JWriteBin(M,"pamtest.bin",dtype="float",dmtype="full")
-#' CalcAndWriteDissimilarityMatrix("pamtest.bin","pamDL2.bin",distype="L2",restype="float",nthreads=0)
-#' L <- ApplyPAM("pamDL2.bin",10,init_method="BUILD")
+#' tmpfile1=paste0(tempdir(),"/pamtest.bin")
+#' JWriteBin(M,tmpfile1,dtype="float",dmtype="full")
+#' tmpdisfile1=paste0(tempdir(),"/pamDl2.bin")
+#' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",restype="float",nthreads=0)
+#' L <- ApplyPAM(tmpdisfile1,10,init_method="BUILD")
 #' # Which are the medoids
 #' L$med
-#' sil <- CalculateSilhouette(L$clasif,"pamDL2.bin")
-#' Lf<-FilterBySilhouetteQuantile(sil,L,"pamtest.bin","pamtestfilt.bin","pamDL2.bin","pamDL2filt.bin",
+#' sil <- CalculateSilhouette(L$clasif,tmpdisfile1)
+#' tmpfiltfile1=paste0(tempdir(),"/pamtestfilt.bin")
+#' tmpfiltdisfile1=paste0(tempdir(),"/pamDL2filt.bin")
+#' Lf<-FilterBySilhouetteQuantile(sil,L,tmpfile1,tmpfiltfile1,tmpdisfile1,tmpfiltdisfile1,
 #'                                q=0.4,addcom=TRUE)
 #' # The new medoids are the same points but renumbered, since the L$clasif array has less points
 #' Lf$med
-#' file.remove("pamtest.bin")
-#' file.remove("pamDL2.bin")
-#' file.remove("pamtestfilt.bin")
-#' file.remove("pamDL2filt.bin")
 #' @export
 FilterBySilhouetteQuantile <- function(s, L, fallcounts, ffilcounts, falldissim, ffildissim, q = 0.2, addcom = TRUE) {
     .Call(`_parallelpam_FilterBySilhouetteQuantile`, s, L, fallcounts, ffilcounts, falldissim, ffildissim, q, addcom)
@@ -132,22 +136,22 @@ FilterBySilhouetteQuantile <- function(s, L, fallcounts, ffilcounts, falldissim,
 #' FilterBySilhouetteThreshold
 #'
 #' Takes a silhouette, as returned by CalculateSilhouette, the list of medoids and class assignments, as returned by ApplyPam,
-#' a threshold and the matrices of counts and dissimilarities and constructs the corresponding matrices clearing off the points whose silhoutte is
+#' a threshold and the matrices of values and dissimilarities and constructs the corresponding matrices clearing off the points whose silhoutte is
 #' below the threshold, except if they are medoids.\cr
 #'
 #' The renumbering of indices in the returned cluster may seem confusing at first but it was the way of fitting this with the rest
 #' of the package. Anyway, notice that if the numeric vectors in the input parameter L were named vectors, the point names are appropriately kept
-#' in the result so point identity is preserved. Moreover, if the individuals and dissimilarity input matrices had row and/or column names, they
+#' in the result so point identity is preserved. Moreover, if the values and dissimilarity input matrices had row and/or column names, they
 #' are preserved in the filtered matrices, too.
 #' 
 #' @param s          A numeric vector with the sihouette coefficient of each point in a classification, as returned by CalculateSilhouette.
 #' @param L          A list of two numeric vectors, L$med and L$clasif, obtained normally as the object returned by ApplyPAM.
-#' @param fallcounts A string with the name of the binary file containing the matrix of counts per individuals. It can be either a full or a sparse matrix.
-#' @param ffilcounts A string with the name of the binary file that will contain the selected individuals. It will have the same character (full/sparse) and type of the complete file.
-#' @param falldissim A string with the name of the binary file containing the dissimilarity matrix of the complete set of individuals. It must be a symmetric matrix of floats.
-#' @param ffildissim A string with the name of the binary file that will contain  the dissimilarity matrix for the remaining individuals. It will be a symmetric matrix of floats.
+#' @param fallcounts A string with the name of the binary file containing the matrix of values per point. It can be either a full or a sparse matrix.
+#' @param ffilcounts A string with the name of the binary file that will contain the selected points. It will have the same character (full/sparse) and type of the complete file.
+#' @param falldissim A string with the name of the binary file containing the dissimilarity matrix of the complete set of points. It must be a symmetric matrix.
+#' @param ffildissim A string with the name of the binary file that will contain  the dissimilarity matrix for the remaining points. It will be a symmetric matrix.
 #' @param thres      Threshold to filter. All points whose silhouette is below this threshold will be filtered out. Default: 0.0 (remember that silhouette is in [-1..1])
-#' @param addcom     Boolean to indicate if a comment must be appended to the current comment of counts and dissimilarity matrices to indicate that they are the result of a filtering process. This comment is automatically generated and contains the value of threshold t. Succesive applications add comments at the end of those already present. Default: TRUE
+#' @param addcom     Boolean to indicate if a comment must be appended to the current comment of values and dissimilarity matrices to indicate that they are the result of a filtering process. This comment is automatically generated and contains the value of threshold t. Succesive applications add comments at the end of those already present. Default: TRUE
 #' @return Lr["med","clasif"] A list of two numeric vectors.\cr
 #'                      Lr$med is a modification of the correponding first element of the passed L parameter.\cr
 #'                      Lr$clasif has as many components as remaining instances.\cr
@@ -169,20 +173,20 @@ FilterBySilhouetteQuantile <- function(s, L, fallcounts, ffilcounts, falldissim,
 #'   M[10*(i-1)+k,]=p+Rf[k,]
 #'  }
 #' }
-#' JWriteBin(M,"pamtest.bin",dtype="float",dmtype="full")
-#' CalcAndWriteDissimilarityMatrix("pamtest.bin","pamDL2.bin",distype="L2",restype="float",nthreads=0)
-#' L <- ApplyPAM("pamDL2.bin",10,init_method="BUILD")
+#' tmpfile1=paste0(tempdir(),"/pamtest.bin")
+#' JWriteBin(M,tmpfile1,dtype="float",dmtype="full")
+#' tmpdisfile1=paste0(tempdir(),"/pamDl2.bin")
+#' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",restype="float",nthreads=0)
+#' L <- ApplyPAM(tmpdisfile1,10,init_method="BUILD")
 #' # Which are the medoids
 #' L$med
-#' sil <- CalculateSilhouette(L$clasif,"pamDL2.bin")
-#' Lf<-FilterBySilhouetteQuantile(sil,L,"pamtest.bin","pamtestfilt.bin","pamDL2.bin","pamDL2filt.bin",
-#'                                 q=0.4,addcom=TRUE)
+#' sil <- CalculateSilhouette(L$clasif,tmpdisfile1)
+#' tmpfiltfile1=paste0(tempdir(),"/pamtestfilt.bin")
+#' tmpfiltdisfile1=paste0(tempdir(),"/pamDL2filt.bin")
+#' Lf<-FilterBySilhouetteThreshold(sil,L,tmpfile1,tmpfiltfile1,tmpdisfile1,tmpfiltdisfile1,
+#'                                thres=0.4,addcom=TRUE)
 #' # The new medoids are the same points but renumbered, since the L$clasif array has less points
 #' Lf$med
-#' file.remove("pamtest.bin")
-#' file.remove("pamDL2.bin")
-#' file.remove("pamtestfilt.bin")
-#' file.remove("pamDL2filt.bin")
 #' @export
 FilterBySilhouetteThreshold <- function(s, L, fallcounts, ffilcounts, falldissim, ffildissim, thres = 0.0, addcom = TRUE) {
     .Call(`_parallelpam_FilterBySilhouetteThreshold`, s, L, fallcounts, ffilcounts, falldissim, ffildissim, thres, addcom)
@@ -199,7 +203,7 @@ FilterBySilhouetteThreshold <- function(s, L, fallcounts, ffilcounts, falldissim
 #' @param L      The list returned by ApplyPAM with fields L$med and\cr
 #'               L$clasif with the numbers of the medoids and the classification of each point
 #' @param fdist  The binary file containing the symmetric matrix with the dissimilarities between points (usually, generated by 
-#'               a call to CalcAndWriteDissimilarityMatrix or to CalcAndWriteDissimilarityMatrixDouble)
+#'               a call to CalcAndWriteDissimilarityMatrix).
 #' @return Df    Dataframe with columns PointName, NNPointName and NNDistance. See Details for description.
 #' @examples
 #' # Synthetic problem: 10 random seeds with coordinates in [0..20]
@@ -215,17 +219,17 @@ FilterBySilhouetteThreshold <- function(s, L, fallcounts, ffilcounts, falldissim
 #'   M[10*(i-1)+k,]=p+Rf[k,]
 #'  }
 #' }
-#' JWriteBin(M,"pamtest.bin",dtype="float",dmtype="full")
-#' CalcAndWriteDissimilarityMatrix("pamtest.bin","pamDL2.bin",distype="L2",restype="float",nthreads=0)
-#' L <- ApplyPAM("pamDL2.bin",10,init_method="BUILD")
-#' df <- ClassifAsDataFrame(L,"pamDL2.bin")
+#' tmpfile1=paste0(tempdir(),"/pamtest.bin")
+#' JWriteBin(M,tmpfile1,dtype="float",dmtype="full")
+#' tmpdisfile1=paste0(tempdir(),"/pamDL2.bin")
+#' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",restype="float",nthreads=0)
+#' L <- ApplyPAM(tmpdisfile1,10,init_method="BUILD")
+#' df <- ClassifAsDataFrame(L,tmpdisfile1)
 #' df
 #' # Identification of medoids:
 #' which(df[,3]==0)
 #' # Verification they are the same as in L (in different order)
 #' L$med
-#' file.remove("pamtest.bin")
-#' file.remove("pamDL2.bin")
 #' @export
 ClassifAsDataFrame <- function(L, fdist) {
     .Call(`_parallelpam_ClassifAsDataFrame`, L, fdist)
@@ -241,17 +245,18 @@ ClassifAsDataFrame <- function(L, fdist) {
 #' used to generate the distance matrix.\cr
 #' The number of instances, N, is not passed since dissimilarity matrix is NxN and therefore its size indicates the N value.
 #' 
-#' With respect to the returned value, L$med has as many components as requested medoids and\cr
-#' L$clasif has as many components as instances.\cr
+#' With respect to the returned value, L$med has as many components\cr
+#' as requested medoids and L$clasif has as many components as instances.\cr
 #' Medoids are expressed in L$med by its number in the array of points (row in the dissimilarity matrix) starting at 1 (R convention).\cr
 #' L$clasif contains the number of the medoid (i.e.: the cluster) to which each instance has been assigned, according to their order in\cr
 #' L$med (also from 1).\cr
-#' This means that if L$clasif[p] is m, the point p belongs to the class grouped around\cr
-#' medoid L$med[m].\cr
-#' Moreover, if the dissimilarity matrix contains as metadata the point names, the returned are R-named vector with such names.
+#' This means that if L$clasif[p] is m, the point p belongs to the\cr
+#' class grouped around medoid L$med[m].\cr
+#' Moreover, if the dissimilarity matrix contains as metadata\cr
+#' (row names) the point names, the returned vector is a R-named vector with such names.
 #' 
 #' @param dissim_file  A string with the name of the binary file that contains the symmetric matrix of dissimilarities. Such matrix
-#'                     should have been generated by CalcAndWriteDissimilarityMatrix and it is a matrix of type 'disttype' (in this type defined as float).
+#'                     should have been generated by CalcAndWriteDissimilarityMatrix and it must be a symmetric matrix.
 #' @param k            A possitive integer (the desired number of medoids).
 #' @param init_method  One of the strings 'PREV', 'BUILD' or 'LAB'. See meaning of initialization algorithms BUILD and LAB in the original paper.\cr
 #'                     'PREV' should be used exclusively to start the second part of the algorithm (optimization) from a initial set of medoids generated by a former call.\cr
@@ -261,8 +266,9 @@ ClassifAsDataFrame <- function(L, fdist) {
 #'                     Default: empty vector.
 #' @param max_iter     The maximum number of allowed iterations. 0 means stop immediately after finding initial medoids.\cr
 #'                     Default: 1000
-#' @param nthreads     For the BUILD initialization algorithm (the only part currently implemented in parallel), the number of used threads.\cr
-#'                     -1 means don't use threads (serial implementation). 0 means let the program choose according to the number of cores and of points.\cr
+#' @param nthreads     The number of used threads.\cr
+#'                     -1 means don't use threads (serial implementation).\cr
+#'                     0 means let the program choose according to the number of cores and of points.\cr
 #'                     Any other number forces this number of threads. Choosing more than the number of available cores is allowed, but discouraged.\cr
 #'                     Default: 0
 #' @return L["med","clasif"] A list of two numeric vectors. See section Details for more information\cr                     
@@ -280,18 +286,18 @@ ClassifAsDataFrame <- function(L, fdist) {
 #'   M[10*(i-1)+k,]=p+Rf[k,]
 #'  }
 #' }
-#' JWriteBin(M,"pamtest.bin",dtype="float",dmtype="full")
-#' CalcAndWriteDissimilarityMatrix("pamtest.bin","pamDL2.bin",distype="L2",restype="float",nthreads=0)
-#' L <- ApplyPAM("pamDL2.bin",10,init_method="BUILD")
+#' tmpfile1=paste0(tempdir(),"/pamtest.bin")
+#' JWriteBin(M,tmpfile1,dtype="float",dmtype="full")
+#' tmpdisfile1=paste0(tempdir(),"/pamDL2.bin")
+#' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",restype="float",nthreads=0)
+#' L <- ApplyPAM(tmpdisfile1,10,init_method="BUILD")
 #' # Final value of sum of distances to closest medoid
-#' GetTD(L,"pamDL2.bin")
+#' GetTD(L,tmpdisfile1)
 #' # Medoids:
 #' L$med
 #' # Medoid in which each individual has been classified
 #' n<-names(L$med)
 #' n[L$clasif]
-#' file.remove("pamtest.bin")
-#' file.remove("pamDL2.bin")
 #' @export
 ApplyPAM <- function(dissim_file, k, init_method = "BUILD", initial_med = NULL, max_iter = 1000L, nthreads = 0L) {
     .Call(`_parallelpam_ApplyPAM`, dissim_file, k, init_method, initial_med, max_iter, nthreads)
@@ -305,7 +311,7 @@ ApplyPAM <- function(dissim_file, k, init_method = "BUILD", initial_med = NULL, 
 #'
 #' @param L            A list of two numeric vectors, L["med","clasif"], as returned by ApplyPAM (please, consult the help of ApplyPAM for details)
 #' @param dissim_file  A string with the name of the binary file that contains the symmetric matrix of dissimilarities. Such matrix
-#'                     should have been generated by CalcAndWriteDissimilarityMatrix and it is a matrix of type 'disttype' (currently defined as float).
+#'                     should have been generated by CalcAndWriteDissimilarityMatrix.
 #' @return TD          The value of the TD function.
 #' @examples
 #' # Synthetic problem: 10 random seeds with coordinates in [0..20]
@@ -321,11 +327,13 @@ ApplyPAM <- function(dissim_file, k, init_method = "BUILD", initial_med = NULL, 
 #'   M[10*(i-1)+k,]=p+Rf[k,]
 #'  }
 #' }
-#' JWriteBin(M,"pamtest.bin",dtype="float",dmtype="full")
-#' CalcAndWriteDissimilarityMatrix("pamtest.bin","pamDL2.bin",distype="L2",restype="float",nthreads=0)
-#' L <- ApplyPAM("pamDL2.bin",10,init_method="BUILD")
+#' tmpfile1=paste0(tempdir(),"/pamtest.bin")
+#' tmpdisfile1=paste0(tempdir(),"/pamDL2.bin")
+#' JWriteBin(M,tmpfile1,dtype="float",dmtype="full")
+#' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",restype="float",nthreads=0)
+#' L <- ApplyPAM(tmpdisfile1,10,init_method="BUILD")
 #' # Final value of sum of distances to closest medoid
-#' GetTD(L,"pamDL2.bin")
+#' GetTD(L,tmpdisfile1)
 #' @export
 GetTD <- function(L, dissim_file) {
     .Call(`_parallelpam_GetTD`, L, dissim_file)
@@ -342,11 +350,11 @@ GetTD <- function(L, dissim_file) {
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 #' Rf[,3]
-#' vf<-GetJCol("Rfullfloat.bin",3)
+#' vf<-GetJCol(tmpfile1,3)
 #' vf
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJCol <- function(fname, ncol) {
     .Call(`_parallelpam_GetJCol`, fname, ncol)
@@ -363,11 +371,10 @@ GetJCol <- function(fname, ncol) {
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-#' Rf[,c(1,4)]
-#' vc<-GetJManyCols("Rfullfloat.bin",c(1,4))
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
+#' vc<-GetJManyCols(tmpfile1,c(1,4))
 #' vc
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJManyCols <- function(fname, extcols) {
     .Call(`_parallelpam_GetJManyCols`, fname, extcols)
@@ -384,11 +391,11 @@ GetJManyCols <- function(fname, extcols) {
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 #' Rf[,"c"]
-#' vf<-GetJColByName("Rfullfloat.bin","c")
+#' vf<-GetJColByName(tmpfile1,"c")
 #' vf
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJColByName <- function(fname, colname) {
     .Call(`_parallelpam_GetJColByName`, fname, colname)
@@ -399,17 +406,17 @@ GetJColByName <- function(fname, colname) {
 #' Returns (as a R numeric matrix) the columns with the requested column names from the matrix contained in a jmatrix binary file
 #'
 #' @param fname        String with the file name that contains the binary data.
-#' @param extcolnames  A numeric vector with the names of the columns to be extracted. If the binary file has no column names, or _any_ of the column names is not present, an empty matrix is returned.
+#' @param extcolnames  A vector of RStrings with the names of the columns to be extracted. If the binary file has no column names, or _any_ of the column names is not present, an empty matrix is returned.
 #' @return             A numeric matrix with the values of elements in the requested columns
 #' @examples
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 #' Rf[,c(1,4)]
-#' vf<-GetJManyColsByNames("Rfullfloat.bin",c("a","d"))
+#' vf<-GetJManyColsByNames(tmpfile1,c("a","d"))
 #' vf
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJManyColsByNames <- function(fname, extcolnames) {
     .Call(`_parallelpam_GetJManyColsByNames`, fname, extcolnames)
@@ -427,11 +434,11 @@ GetJManyColsByNames <- function(fname, extcolnames) {
 #' Rsym <- 0.5*(Rns+t(Rns))
 #' rownames(Rsym) <- c("A","B","C","D","E","F","G")
 #' colnames(Rsym) <- c("a","b","c","d","e","f","g")
-#' JWriteBin(Rsym,"Rsymfloat.bin",dtype="float",dmtype="symmetric")
-#' d<-GetSubdiag("Rsymfloat.bin")
+#' tmpfile1=paste0(tempdir(),"/Rsymfloat.bin")
+#' JWriteBin(Rsym,tmpfile1,dtype="float",dmtype="symmetric")
+#' d<-GetSubdiag(tmpfile1)
 #' Rsym
 #' d
-#' file.remove("Rsymfloat.bin")
 #' @export
 GetSubdiag <- function(fname) {
     .Call(`_parallelpam_GetSubdiag`, fname)
@@ -448,11 +455,11 @@ GetSubdiag <- function(fname) {
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 #' Rf[3,]
-#' vf<-GetJRow("Rfullfloat.bin",3)
+#' vf<-GetJRow(tmpfile1,3)
 #' vf
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJRow <- function(fname, nrow) {
     .Call(`_parallelpam_GetJRow`, fname, nrow)
@@ -469,11 +476,11 @@ GetJRow <- function(fname, nrow) {
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 #' Rf[c(1,4),]
-#' vc<-GetJManyRows("Rfullfloat.bin",c(1,4))
+#' vc<-GetJManyRows(tmpfile1,c(1,4))
 #' vc
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJManyRows <- function(fname, extrows) {
     .Call(`_parallelpam_GetJManyRows`, fname, extrows)
@@ -490,11 +497,11 @@ GetJManyRows <- function(fname, extrows) {
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 #' Rf["C",]
-#' vf<-GetJRowByName("Rfullfloat.bin","C")
+#' vf<-GetJRowByName(tmpfile1,"C")
 #' vf
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJRowByName <- function(fname, rowname) {
     .Call(`_parallelpam_GetJRowByName`, fname, rowname)
@@ -505,17 +512,17 @@ GetJRowByName <- function(fname, rowname) {
 #' Returns (as a R numeric matrix) the rows with the requested row names from the matrix contained in a jmatrix binary file
 #'
 #' @param fname        String with the file name that contains the binary data.
-#' @param extrownames  A numeric vector with the names of the rows to be extracted. If the binary file has no row names, or _any_ of the row names is not present, an empty matrix is returned.
+#' @param extrownames  A vector of RStrings with the names of the rows to be extracted. If the binary file has no row names, or _any_ of the row names is not present, an empty matrix is returned.
 #' @return             A numeric matrix with the values of elements in the requested rows
 #' @examples
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 #' Rf[c("A","C"),]
-#' vf<-GetJManyRowsByNames("Rfullfloat.bin",c("A","C"))
+#' vf<-GetJManyRowsByNames(tmpfile1,c("A","C"))
 #' vf
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJManyRowsByNames <- function(fname, extrownames) {
     .Call(`_parallelpam_GetJManyRowsByNames`, fname, extrownames)
@@ -532,9 +539,9 @@ GetJManyRowsByNames <- function(fname, extrownames) {
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-#' JMatInfo("Rfullfloat.bin")
-#' file.remove("Rfullfloat.bin")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
+#' JMatInfo(tmpfile1)
 #' @export
 JMatInfo <- function(fname, fres = "") {
     invisible(.Call(`_parallelpam_JMatInfo`, fname, fres))
@@ -550,10 +557,10 @@ JMatInfo <- function(fname, fres = "") {
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-#' rn<-GetJRowNames("Rfullfloat.bin")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
+#' rn<-GetJRowNames(tmpfile1)
 #' rn
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJRowNames <- function(fname) {
     .Call(`_parallelpam_GetJRowNames`, fname)
@@ -564,15 +571,15 @@ GetJRowNames <- function(fname) {
 #' Returns a R StringVector with the column names of a matrix stored in the binary format of package jmatrix, if it has them stored.
 #'
 #' @param fname  String with the file name that contains the binary data.
-#' @return A R StringVector with the column names, or the empty vector if the binaryfile has no row column names as metadata.
+#' @return A R StringVector with the column names, or the empty vector if the binaryfile has no column names as metadata.
 #' @examples
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-#' cn<-GetJColNames("Rfullfloat.bin")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
+#' cn<-GetJColNames(tmpfile1)
 #' cn
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJColNames <- function(fname) {
     .Call(`_parallelpam_GetJColNames`, fname)
@@ -585,16 +592,16 @@ GetJColNames <- function(fname) {
 #' @param fname  String with the file name that contains the binary data.
 #' @return N["rownames","colnames"]: A list with two elements named rownames and colnames which are R StringVectors.
 #'         If the binary file has no row or column names as metadata BOTH will be returned as empty vectors, even if one of them exists.
-#'         If you want to extract only one, use either GetBinRowNames or GetBinColNames, as appropriate.
+#'         If you want to extract only one, use either GetJRowNames or GetJColNames, as appropriate.
 #' @examples
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-#' N<-GetJNames("Rfullfloat.bin")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
+#' N<-GetJNames(tmpfile1)
 #' N["rownames"]
 #' N["colnames"]
-#' file.remove("Rfullfloat.bin")
 #' @export
 GetJNames <- function(fname) {
     .Call(`_parallelpam_GetJNames`, fname)
@@ -625,8 +632,8 @@ GetJNames <- function(fname) {
 #' Rf <- matrix(runif(48),nrow=6)
 #' rownames(Rf) <- c("A","B","C","D","E","F")
 #' colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-#' JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-#' file.remove("Rfullfloat.bin")
+#' tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+#' JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 #' @export
 JWriteBin <- function(M, fname, dtype = "float", dmtype = "full", comment = "") {
     invisible(.Call(`_parallelpam_JWriteBin`, M, fname, dtype, dmtype, comment))
@@ -640,12 +647,13 @@ JWriteBin <- function(M, fname, dtype = "float", dmtype = "full", comment = "") 
 #' @param cl        The array of classification with the number of the class to which each point belongs to. This number must be in 1..number_of_classes.\cr
 #'                  This function takes something like the L$clasif array which is the second element of the list returned by ApplyPAM
 #' @param fdist     The binary file containing the symmetric matrix with the dissimilarities between points (usually, generated by a call to CalcAndWriteDissimilarityMatrix)
-#' @param nthreads  The number of used threads.\cr
-#'                  -1 means don't use threads (serial implementation). 0 means let the program choose according to the number of cores and of points.\cr
+#' @param nthreads  The number of used threads for parallel calculation.\cr
+#'                  -1 means don't use threads (serial implementation).\cr
+#'                   0 means let the program choose according to the number of cores and of points.\cr
 #'                   Any other number forces this number of threads. Choosing more than the number of available cores is allowed, but discouraged.\cr
 #'                   Default: 0
 #' @return sil       Numeric vector with the values of the silhouette for each point, in the same order in which points are in cl.\cr
-#'                   If cl is a named vector sill will be a named vector, too, with the same names.
+#'                   If cl is a named vector sil will be a named vector, too, with the same names.
 #' @examples
 #' # Synthetic problem: 10 random seeds with coordinates in [0..20]
 #' # to which random values in [-0.1..0.1] are added
@@ -660,14 +668,14 @@ JWriteBin <- function(M, fname, dtype = "float", dmtype = "full", comment = "") 
 #'   M[10*(i-1)+k,]=p+Rf[k,]
 #'  }
 #' }
-#' JWriteBin(M,"pamtest.bin",dtype="float",dmtype="full")
-#' CalcAndWriteDissimilarityMatrix("pamtest.bin","pamDL2.bin",distype="L2",restype="float",nthreads=0)
-#' L <- ApplyPAM("pamDL2.bin",10,init_method="BUILD")
-#' sil <- CalculateSilhouette(L$clasif,"pamDL2.bin")
+#' tmpfile1=paste0(tempdir(),"/pamtest.bin")
+#' JWriteBin(M,tmpfile1,dtype="float",dmtype="full")
+#' tmpdisfile1=paste0(tempdir(),"/pamDL2.bin")
+#' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",restype="float",nthreads=0)
+#' L <- ApplyPAM(tmpdisfile1,10,init_method="BUILD")
+#' sil <- CalculateSilhouette(L$clasif,tmpdisfile1)
 #' # Histogram of the silhouette. In this synthetic problem, almost 1 for all points
 #' hist(sil)
-#' file.remove("pamtest.bin")
-#' file.remove("pamDL2.bin")
 #' @export
 CalculateSilhouette <- function(cl, fdist, nthreads = 0L) {
     .Call(`_parallelpam_CalculateSilhouette`, cl, fdist, nthreads)
@@ -680,8 +688,8 @@ CalculateSilhouette <- function(cl, fdist, nthreads = 0L) {
 #' @param cl        The array of classification with the number of the class to which each point belongs to. This number must be in 1..number_of_classes.\cr
 #'                  This function takes something like the L$clasif array which is the second element of the list returned by ApplyPAM
 #' @param s         The numeric value of the silhouette for each point, with points in the same order as they appear in cl.\cr
-#'                  This is the vector returned by after a call to CalculateSilhouette with the same value of parameter cl.
-#' @return sp       A silhouette in the format of the cluster package which is a NumericMatrix of as many rows as points and three columns: cluster, neighbor and sil_width.\cr
+#'                  This is the vector returned by a call to CalculateSilhouette with the same value of parameter cl.
+#' @return sp       A silhouette in the format of the cluster package which is a NumericMatrix with as many rows as points and three columns: cluster, neighbor and sil_width.\cr
 #'                  Its structure and dimension names are as in package 'cluster', which allows to use it with the silhouette plotting functions of such package\cr
 #'                  This means you can do library(cluster) followed by plot(NumSilToClusterSil(cl,s)) to get a beatiful plot.
 #' @examples
@@ -698,14 +706,15 @@ CalculateSilhouette <- function(cl, fdist, nthreads = 0L) {
 #'   M[10*(i-1)+k,]=p+Rf[k,]
 #'  }
 #' }
-#' JWriteBin(M,"pamtest.bin",dtype="float",dmtype="full")
-#' CalcAndWriteDissimilarityMatrix("pamtest.bin","pamDL2.bin",distype="L2",restype="float",nthreads=0)
-#' L <- ApplyPAM("pamDL2.bin",10,init_method="BUILD")
-#' sil <- CalculateSilhouette(L$clasif,"pamDL2.bin")
+#' tmpfile1=paste0(tempdir(),"/pamtest.bin")
+#' JWriteBin(M,tmpfile1,dtype="float",dmtype="full")
+#' tmpdisfile1=paste0(tempdir(),"/pamDL2.bin")
+#' CalcAndWriteDissimilarityMatrix(tmpfile1,tmpdisfile1,distype="L2",restype="float",nthreads=0)
+#' L <- ApplyPAM(tmpdisfile1,10,init_method="BUILD")
+#' sil <- CalculateSilhouette(L$clasif,tmpdisfile1)
 #' sp <- NumSilToClusterSil(L$clasif,sil)
-#' # Here you can install and load package cluster and make plot(sp)
-#' file.remove("pamtest.bin")
-#' file.remove("pamDL2.bin")
+#' library(cluster)
+#' plot(sp)
 #' @export
 NumSilToClusterSil <- function(cl, s) {
     .Call(`_parallelpam_NumSilToClusterSil`, cl, s)

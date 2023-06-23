@@ -9,7 +9,7 @@ GetJManyColsByNames(fname, extcolnames)
 \arguments{
 \item{fname}{String with the file name that contains the binary data.}
 
-\item{extcolnames}{A numeric vector with the names of the columns to be extracted. If the binary file has no column names, or _any_ of the column names is not present, an empty matrix is returned.}
+\item{extcolnames}{A vector of RStrings with the names of the columns to be extracted. If the binary file has no column names, or _any_ of the column names is not present, an empty matrix is returned.}
 }
 \value{
 A numeric matrix with the values of elements in the requested columns
@@ -21,9 +21,9 @@ Returns (as a R numeric matrix) the columns with the requested column names from
 Rf <- matrix(runif(48),nrow=6)
 rownames(Rf) <- c("A","B","C","D","E","F")
 colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 Rf[,c(1,4)]
-vf<-GetJManyColsByNames("Rfullfloat.bin",c("a","d"))
+vf<-GetJManyColsByNames(tmpfile1,c("a","d"))
 vf
-file.remove("Rfullfloat.bin")
 }

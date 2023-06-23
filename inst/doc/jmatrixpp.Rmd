@@ -232,18 +232,3 @@ of the matrix character (full, sparse or symmetric) so
 you can play with them using the `Rspafloat.bin` and `Rsymfloat.bin` file 
 to check they work.
 
-Finally, there is a function to get the lower-diagonal part of a symmetric 
-matrix stored in a `jmatrix` file as a R vector,
-ordered by columns (i.e.: column 1 from M(2,1) to M(n,1), followed by 
-column 2 from M(3,2) to M(n,2) and so on, up to M(n,n-1) so
-d is a vector of $n(n-1)/2$ components). This is to get the data 
-of a dissimilarity/distance matrix in the format used by the Partitioning
-around medoids (PAM) algorithm implemented in the `cluster` (@R-cluster) package.
-The purpose is to compare such implementation with our own implementation
-of PAM. If you are interested, see the documentation of the 
-`parallelpam` (@R-parallelpam) package.
-
-```{r}
-(d<-GetSubdiag("Rsymfloat.bin"))
-```
-

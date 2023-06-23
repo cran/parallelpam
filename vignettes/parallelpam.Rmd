@@ -89,20 +89,20 @@ ndim<-500
 P<-matrix(runif(nvec*ndim),nrow=nvec)
 rownames(P)<-paste0("V",1:nvec)
 colnames(P)<-paste0("d",1:ndim)
-## Write it to disk as a binary file in JMatrix format. Please,
-## see vignette of package jmatrix.
+# Write it to disk as a binary file in jmatrix format. Please,
+# see vignette jmatrixpp.
 JWriteBin(P,"datatest.bin",dtype="float",dmtype="full",
           comment="Synthetic problem data to test PAM")
 ```
 For your real problem, the input format can be a `.csv` file. 
-See function `CsvToJMat` in package `scellpam (@R-scellpam).
+See function `CsvToJMat` in package `scellpam` (@R-scellpam).
 
-To know details about the generated files do,
+To know details about the generated files do
 ```{r}
 JMatInfo("datatest.bin")
 ```
 
-## Calculating the distance/dissimilarity matrix  
+## Calculating the distance/dissimilarity matrix
 
 This is the most computationally intensive part of the process 
 (particularly, for samples with a high number of points and/or
@@ -152,8 +152,7 @@ depending on your machine, possibly due (I guess) to the memory access
 conflicts created by the need of keep processor cache coherence.
 You may have to do some trials with your data in your machine.
 
-Now, let us  try it with this small dataset.  
-
+Now, let us try it with this small dataset.
 ```{r}
 CalcAndWriteDissimilarityMatrix("datatest.bin","datatestL2.bin",
                                 distype="L2",restype="float",
@@ -162,17 +161,17 @@ CalcAndWriteDissimilarityMatrix("datatest.bin","datatestL2.bin",
 ```
 
 The resulting matrix is stored as a binary symmetric matrix of float 
-values, as we can check. 
+values, as we can check.
 ```{r}
 JMatInfo("datatestL2.bin")
 ```
 
 ## Applying PAM  
 
-The last step is to take the previously calculated matrix and apply 
+The last step is to take the previously calculated matrix and apply
 the Partitioning Around Medoids classifier. Function is
 `ApplyPAM`. First parameter (name of the file containing the dissimilarity
-matrix in `jmatrix format) and second parameter (`k`, number of medoids)
+matrix in `jmatrix` format) and second parameter (`k`, number of medoids)
 are compulsory. The names and default values for the rest of parameters 
 are as in this example.
 
@@ -185,21 +184,21 @@ Parameters `init_method` (and another optional parameter, `initial_med`)
 deserve special comment. The first is the method to initialize
 the medoids. Its possible values are `BUILD`, `LAB` and `PREV`.
 The rest of the algorithm make medoid swapping between the points
-of the initial set made with `BUILD` or `LAB` and the rest of points 
+of the initial set made with `BUILD` or `LAB` and the rest of points
 until no swap can reduce the objective function, which is
-the sum of distances of each point to its closest medoid. But this may 
+the sum of distances of each point to its closest medoid. But this may
 fall (and indeed falls) in local minima. If you
 initialize with `BUILD` or `LAB` the optional parameter `initial_med`
 cannot be used.
 
 The initialization methods `BUILD` and `LAB` are described in the paper
-from Schubert at al. @Schubert2019. `BUILD` is deterministic. 
-`LAB` uses a sample of the total points to initialize. 
+from Schubert at al. (@Schubert2019). `BUILD` is deterministic.
+`LAB` uses a sample of the total points to initialize.
 Obviously, you can run `LAB` to get different initializations and compare
 the results. 
 
-The returned object is a list with two fields: `med` and `clasif`. 
-This will be explained later. 
+The returned object is a list with two fields: `med` and `clasif`.
+This will be explained later.
 
 From now on, typical calls to obtain only the initial medoids would be
 ```{r}
@@ -209,9 +208,9 @@ Llab2=ApplyPAM("datatestL2.bin",k=5,init_method="LAB",max_iter=0)
 ```
 As it can be seen, to get and compare different initializations you must set
 the parameter `max_iter` to the value `0`. In this
-case no iterations of objective function reduction are performed, and the 
+case no iterations of objective function reduction are performed, and the
 returned object contains the initial
-medoids and the classification induced by them. Notice that even looking 
+medoids and the classification induced by them. Notice that even looking
 equal, the results of the latter two calls are different since `LAB`
 initializes with a random component (the sample to choose initial medoids
 is chosen randomly).
@@ -226,11 +225,11 @@ them contains a specially good set of medoids. This is the role of method
 Llab2Final=ApplyPAM("datatestL2.bin",k=5,init_method="PREV",
                     initial_med=Llab2$med)
 ```
-The initial set of medoids is taken from the object returned by the former 
-calls.
+The initial set of medoids is taken from the object returned by the
+former calls.
 
 With respect to that object, as we said it is a list with two vectors. 
-The first one, `L$med`, has as many components as requested medoids and 
+The first one, `L$med`, has as many components as requested medoids and
 the second, `L$clasif`, has as many components as instances. 
 
 Medoids are expressed in `L$med` by its number in the array of vectors 
@@ -240,8 +239,8 @@ Medoids are expressed in `L$med` by its number in the array of vectors
 each instance has been assigned, according to their order in `L$med`
 (also from 1).
 
-This means that if `L$clasif[p]` is `m`, the point `p` belongs to the class 
-grouped around medoid `L$med[m]`. Let us see it.
+This means that if `L$clasif[p]` is `m`, the point `p` belongs to the
+class grouped around medoid `L$med[m]`. Let us see it.
 ```{r}
 # Which are the indexes of the points chosen as medoids?
 L$med
@@ -255,7 +254,7 @@ L$med[L$clasif[147]]
 ```
 
 In this way, values in `L$clasif` are between 1 and the number of
-medoids, as we can see.
+medoids, as we can see:
 ```{r}
 min(L$clasif)
 max(L$clasif)
@@ -266,10 +265,10 @@ They can be used as factors.
 
 It is interesting to filter points based on the degree in which they belong
 to a cluster. Indeed, cluster refinement can be done
-getting rid of points far away from any cluster center, or which are at a 
+getting rid of points far away from any cluster center, or which are at a
 similar distance of two or more of them.
 
-This is characterized by the silhouette of each point. Three functions deal 
+This is characterized by the silhouette of each point. Three functions deal
 with this: `CalculateSilhouette`, `FilterBySilhouetteQuantile`
 and `FilterBySilhouetteThreshold`.
 
@@ -281,13 +280,13 @@ The parameters to function `CalculateSilhouette` are the array of class
 membership, as returned by `ApplyPAM` in its `clasif` field, and
 the file with the matrix of dissimilarities.
 
-A parallel implementation has been programmed, being nthreads as explained 
+A parallel implementation has been programmed, being nthreads as explained
 before.
 
-Silhouette is a number in $[-1,1]$; the higher its value, the most centered 
+Silhouette is a number in $[-1,1]$; the higher its value, the most centered
 a point is in its cluster. 
 
-The returned object `S` is a numeric vector with the value of the silhouette 
+The returned object `S` is a numeric vector with the value of the silhouette
 for each point, which will be a named vector if the classification
 vector was named.
 
@@ -318,14 +317,14 @@ discarded, except if they are medoids. Parameters are:
 
 - The silhouette, as returned by `CalculateSilhouette`.  
 
-- The list of medoids/clasif, as returned by `ApplyPAM`.  
+- The list of medoids/clasif, as returned by `ApplyPAM`.
 
-- The file with matrix of counts for the whole set of individuals, which was 
+- The file with matrix of counts for the whole set of individuals, which was
 our first input.  
 
 - The file that will contain the matrix of counts of the remaining individuals.  
 
-- The file with the dissimilarity matrix for the whole set, as calculated 
+- The file with the dissimilarity matrix for the whole set, as calculated
 by `CalcAndWriteDissimilarityMatrix`.  
 
 - The file that will contain the dissimilarity for the remaining individuals.
@@ -347,7 +346,7 @@ The same happens with respect to rows of the dissimilarity matrix.
 
 Notice that the new dissimilarity matrix could have been calculated from 
 the matrix of filtered counts with `CalcAndWriteDissimilarityMatrix`
-but creating it here, simply getting rid of the filtered rows and columns 
+but creating it here, simply getting rid of the filtered rows and columns
 is much faster.
 
 Also, if a medoid is below the silhouette quantile, it will not be 
@@ -366,4 +365,70 @@ Of course, we might have used simply 5 as number of medoids, `k`,
 since this does not change by filtering, but this is to emphasize
 the fact that `ApplyPAM` with method `PREV` requires both parameters 
 to be consistent.
+
+## Comparison with other PAM implementations
+
+The user might want to compare this PAM implementation with others provided
+for instance by packages `cluster` (@R-cluster) or `ClusterR` (@R-ClusterR).
+In `cluster` the input is either the data matrix (so the distance matrix
+is calculated inside the pam function) or directly the distance matrix but
+as a R vector with the lower-diagonal part of the symmetric matrix ordered
+by columns (i.e.: column 1 from M(2,1) to M(n,1), followed by column 2 from
+M(3,2) to M(n,2) and so on, up to M(n,n-1). This is a vector of $n(n-1)/2$
+components. To facilitate such comparison the function `GetSubdiag` is
+provided which takes as input the jmatrix file with the distance matrix
+and returns the vector to be passed to pam in the aforementioned packages.
+
+```{r, results='hide'}
+d = GetSubdiag("datatestL2.bin")
+```
+Then, explicit comparison could be done with:
+
+(Sorry, we can't try ourselves since we don't know if cluster is installed in
+your system and the CRAN check does not allow the use of installed.packages
+to test it)
+```{r, eval=FALSE}
+library(cluster)
+clusterpam = pam(d,diss=TRUE,k=5)
+print(sort(clusterpam$id.med))
+print(sort(L$med))
+```
+
+Similarly, you can check against the ClusterR package. In this package you need
+the complete dissimilarity matrix to be passed so we have to get it:
+```{r, eval=FALSE}
+# Be patient, this may take some time...
+Dm = GetJManyRows("datatestL2.bin",seq(1:nvec))
+```
+
+and then
+```{r, eval=FALSE}
+library(ClusterR)
+ClusterRpam = Cluster_Medoids(Dm,clusters=5)
+print(sort(ClusterRpam$medoid_indices))
+print(sort(L$med))
+```
+
+In all cases we tried with this simple (but random) example results were the same.
+In other cases with a large number of points some medoids were different in the
+different implementations but the value of the function to minimize (sum of distances)
+was always the same, indicating that they were equivalent minima. You can test this
+with function `GetTD` as follows:
+```{r, eval=FALSE}
+TDparallelpam = GetTD(L,"datatestL2.bin")
+
+# This is to adapt cluster package output format to ours, since this is what our GetTD function expects...
+Lcl = list()
+Lcl$med = clusterpam$id.med
+Lcl$clasif = clusterpam$clustering
+TDcluster = GetTD(Lcl,"datatestL2.bin")
+
+# The same with ClusterR package:
+LclR = list()
+LclR$med = ClusterRpam$medoid_indices
+LclR$clasif = ClusterRpam$clusters
+TDClusterR = GetTD(LclR,"datatestL2.bin")
+```
+
+and see that variables `TDparallelpam`, `TDcluster` and `TDClusterR` are equal.
 

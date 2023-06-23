@@ -21,9 +21,9 @@ Returns (as a R numeric matrix) the rows with the requested row numbers from the
 Rf <- matrix(runif(48),nrow=6)
 rownames(Rf) <- c("A","B","C","D","E","F")
 colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
+tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
 Rf[c(1,4),]
-vc<-GetJManyRows("Rfullfloat.bin",c(1,4))
+vc<-GetJManyRows(tmpfile1,c(1,4))
 vc
-file.remove("Rfullfloat.bin")
 }

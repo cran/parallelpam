@@ -104,6 +104,3 @@ JWriteBin(Rsym,"Rsymfloat.bin",dtype="float",dmtype="symmetric",
 # Get the information 
 JMatInfo("Rsymfloat.bin")
 
-## -----------------------------------------------------------------------------
-(d<-GetSubdiag("Rsymfloat.bin"))
-

@@ -12,7 +12,7 @@ GetJNames(fname)
 \value{
 N["rownames","colnames"]: A list with two elements named rownames and colnames which are R StringVectors.
         If the binary file has no row or column names as metadata BOTH will be returned as empty vectors, even if one of them exists.
-        If you want to extract only one, use either GetBinRowNames or GetBinColNames, as appropriate.
+        If you want to extract only one, use either GetJRowNames or GetJColNames, as appropriate.
 }
 \description{
 Returns a R list of two elements, rownames and colnames, each of them being a R StringVector with the corresponding names
@@ -21,9 +21,9 @@ Returns a R list of two elements, rownames and colnames, each of them being a R 
 Rf <- matrix(runif(48),nrow=6)
 rownames(Rf) <- c("A","B","C","D","E","F")
 colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-N<-GetJNames("Rfullfloat.bin")
+tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
+N<-GetJNames(tmpfile1)
 N["rownames"]
 N["colnames"]
-file.remove("Rfullfloat.bin")
 }

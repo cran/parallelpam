@@ -29,7 +29,7 @@ unsigned char DEB=NODEBUG;
 //' On package load the default status is OFF.\cr
 //' Setting debugging of any part to ON shows a message. Setting to OFF does not show anything (since debugging is OFF...)
 //'
-//' @param deb     boolean, TRUE to generate debug messages for the PAM algorithm and FALSE to turn them off. Default: true.
+//' @param deb     boolean, TRUE to generate debug messages for the PAM algorithm and silhouette calculation and FALSE to turn them off. Default: true.
 //' @param debjmat boolean, TRUE to generate debug messages for the jmatrix part inside this package and FALSE to turn them off. Default: false
 //' @return        No return value, called for side effects (internal boolean flag changed)
 //' @examples

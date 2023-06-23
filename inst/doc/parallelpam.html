@@ -209,12 +209,12 @@ div.csl-indent {
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>P<span class="ot">&lt;-</span><span class="fu">matrix</span>(<span class="fu">runif</span>(nvec<span class="sc">*</span>ndim),<span class="at">nrow=</span>nvec)</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(P)<span class="ot">&lt;-</span><span class="fu">paste0</span>(<span class="st">&quot;V&quot;</span>,<span class="dv">1</span><span class="sc">:</span>nvec)</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(P)<span class="ot">&lt;-</span><span class="fu">paste0</span>(<span class="st">&quot;d&quot;</span>,<span class="dv">1</span><span class="sc">:</span>ndim)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Write it to disk as a binary file in JMatrix format. Please,</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="do">## see vignette of package jmatrix.</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Write it to disk as a binary file in jmatrix format. Please,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># see vignette jmatrixpp.</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">JWriteBin</span>(P,<span class="st">&quot;datatest.bin&quot;</span>,<span class="at">dtype=</span><span class="st">&quot;float&quot;</span>,<span class="at">dmtype=</span><span class="st">&quot;full&quot;</span>,</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">comment=</span><span class="st">&quot;Synthetic problem data to test PAM&quot;</span>)</span></code></pre></div>
-<p>For your real problem, the input format can be a <code>.csv</code> file. See function <code>CsvToJMat</code> in package `scellpam (<span class="citation">Domingo (2022c)</span>).</p>
-<p>To know details about the generated files do,</p>
+<p>For your real problem, the input format can be a <code>.csv</code> file. See function <code>CsvToJMat</code> in package <code>scellpam</code> (<span class="citation">Domingo (2022c)</span>).</p>
+<p>To know details about the generated files do</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">JMatInfo</span>(<span class="st">&quot;datatest.bin&quot;</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; File:               datatest.bin</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Matrix type:        FullMatrix</span></span>
@@ -250,10 +250,10 @@ div.csl-indent {
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Creating dissimilarity matrix of size (5000x5000)</span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: memuse</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Package memuse is installed. OK.</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 250564876 Kib.</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 255160216 Kib.</span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   That seems OK.</span></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Launching up to 128 simultaneous threads.</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; End of dissimilarity matrix calculation (parallel version). Elapsed time: 0.301461 s</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; End of dissimilarity matrix calculation (parallel version). Elapsed time: 0.29268 s</span></span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Output binary file datatestL2.bin written.</span></span></code></pre></div>
 <p>The resulting matrix is stored as a binary symmetric matrix of float values, as we can check.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">JMatInfo</span>(<span class="st">&quot;datatestL2.bin&quot;</span>)</span>
@@ -270,92 +270,92 @@ div.csl-indent {
 </div>
 <div id="applying-pam" class="section level2">
 <h2>Applying PAM</h2>
-<p>The last step is to take the previously calculated matrix and apply the Partitioning Around Medoids classifier. Function is <code>ApplyPAM</code>. First parameter (name of the file containing the dissimilarity matrix in <code>jmatrix format) and second parameter (</code>k`, number of medoids) are compulsory. The names and default values for the rest of parameters are as in this example.</p>
+<p>The last step is to take the previously calculated matrix and apply the Partitioning Around Medoids classifier. Function is <code>ApplyPAM</code>. First parameter (name of the file containing the dissimilarity matrix in <code>jmatrix</code> format) and second parameter (<code>k</code>, number of medoids) are compulsory. The names and default values for the rest of parameters are as in this example.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>L<span class="ot">=</span><span class="fu">ApplyPAM</span>(<span class="st">&quot;datatestL2.bin&quot;</span>,<span class="at">k=</span><span class="dv">5</span>,<span class="at">init_method=</span><span class="st">&quot;BUILD&quot;</span>,<span class="at">max_iter=</span><span class="dv">1000</span>,</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">nthreads=</span><span class="dv">0</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Reading symmetric distance/dissimilarity matrix datatestL2.bin</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Package memuse is installed. OK.</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 250559180 Kib.</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 255156236 Kib.</span></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   That seems OK.</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Matrix is a correct distance/dissimilarity matrix.</span></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Starting BUILD initialization method, parallel version with 128 threads.</span></span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">WARNING</span><span class="co">: all successive messages use R-numbering (from 1) for points and medoids. Substract 1 to get the internal C-numbers.</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 1. Medoid 1 found. Point 1874. TD=8.787174</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 2. Medoid 2 found. Point 4697. 2171 reassigned points. TD=8.693883</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 3. Medoid 3 found. Point 1157. 1463 reassigned points. TD=8.646665</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 4. Medoid 4 found. Point 3873. 1031 reassigned points. TD=8.615054</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 5. Medoid 5 found. Point 1435. 830 reassigned points. TD=8.591785</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Current TD: 8.591785</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; BUILD initialization method (parallel version) finished. Elapsed time: 0.0255073 s</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 1. Medoid 1 found. Point 2617. TD=8.827161</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 2. Medoid 2 found. Point 2576. 2518 reassigned points. TD=8.713119</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 3. Medoid 3 found. Point 436. 1587 reassigned points. TD=8.657971</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 4. Medoid 4 found. Point 3015. 1170 reassigned points. TD=8.620882</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 5. Medoid 5 found. Point 1685. 945 reassigned points. TD=8.593162</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Current TD: 8.593162</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; BUILD initialization method (parallel version) finished. Elapsed time: 0.0244181 s</span></span>
 <span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Starting improved FastPAM1 method in parallel implementation with 128 threads.</span></span>
 <span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">WARNING</span><span class="co">: all successive messages use R-numbering (from 1) for points and medoids. Substract 1 to get the internal C-numbers.</span></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 0.    Exiting, since DeltaTDst is 0.000000. Final value of TD is 8.591786</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Optimization method (parallel version) finished. Elapsed time: 0.0053218 s</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 0.    Exiting, since DeltaTDst is 0.000000. Final value of TD is 8.593156</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Optimization method (parallel version) finished. Elapsed time: 0.00522037 s</span></span>
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Time summary  (parallel implementation with 128 threads).</span></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0.0255073 s (method BUILD).</span></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Optimization:  0.0053218 s in 0 iterations.</span></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.0308291 s (0 minutes, 0.0308291 seconds).</span></span></code></pre></div>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0.0244181 s (method BUILD).</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Optimization:  0.00522037 s in 0 iterations.</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.0296385 s (0 minutes, 0.0296385 seconds).</span></span></code></pre></div>
 <p>Parameters <code>init_method</code> (and another optional parameter, <code>initial_med</code>) deserve special comment. The first is the method to initialize the medoids. Its possible values are <code>BUILD</code>, <code>LAB</code> and <code>PREV</code>. The rest of the algorithm make medoid swapping between the points of the initial set made with <code>BUILD</code> or <code>LAB</code> and the rest of points until no swap can reduce the objective function, which is the sum of distances of each point to its closest medoid. But this may fall (and indeed falls) in local minima. If you initialize with <code>BUILD</code> or <code>LAB</code> the optional parameter <code>initial_med</code> cannot be used.</p>
-<p>The initialization methods <code>BUILD</code> and <code>LAB</code> are described in the paper from Schubert at al. <span class="citation">Schubert and Rousseeuw (2019)</span>. <code>BUILD</code> is deterministic. <code>LAB</code> uses a sample of the total points to initialize. Obviously, you can run <code>LAB</code> to get different initializations and compare the results.</p>
+<p>The initialization methods <code>BUILD</code> and <code>LAB</code> are described in the paper from Schubert at al. (<span class="citation">Schubert and Rousseeuw (2019)</span>). <code>BUILD</code> is deterministic. <code>LAB</code> uses a sample of the total points to initialize. Obviously, you can run <code>LAB</code> to get different initializations and compare the results.</p>
 <p>The returned object is a list with two fields: <code>med</code> and <code>clasif</code>. This will be explained later.</p>
 <p>From now on, typical calls to obtain only the initial medoids would be</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Lbuild<span class="ot">=</span><span class="fu">ApplyPAM</span>(<span class="st">&quot;datatestL2.bin&quot;</span>,<span class="at">k=</span><span class="dv">5</span>,<span class="at">init_method=</span><span class="st">&quot;BUILD&quot;</span>,<span class="at">max_iter=</span><span class="dv">0</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Reading symmetric distance/dissimilarity matrix datatestL2.bin</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Package memuse is installed. OK.</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 250547892 Kib.</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 255142752 Kib.</span></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   That seems OK.</span></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Matrix is a correct distance/dissimilarity matrix.</span></span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Starting BUILD initialization method, parallel version with 128 threads.</span></span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">WARNING</span><span class="co">: all successive messages use R-numbering (from 1) for points and medoids. Substract 1 to get the internal C-numbers.</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 1. Medoid 1 found. Point 1874. TD=8.787174</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 2. Medoid 2 found. Point 4697. 2171 reassigned points. TD=8.693883</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 3. Medoid 3 found. Point 1157. 1463 reassigned points. TD=8.646665</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 4. Medoid 4 found. Point 3873. 1031 reassigned points. TD=8.615054</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 5. Medoid 5 found. Point 1435. 830 reassigned points. TD=8.591785</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Current TD: 8.591785</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; BUILD initialization method (parallel version) finished. Elapsed time: 0.0267297 s</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 1. Medoid 1 found. Point 2617. TD=8.827161</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 2. Medoid 2 found. Point 2576. 2518 reassigned points. TD=8.713119</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 3. Medoid 3 found. Point 436. 1587 reassigned points. TD=8.657971</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 4. Medoid 4 found. Point 3015. 1170 reassigned points. TD=8.620882</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 5. Medoid 5 found. Point 1685. 945 reassigned points. TD=8.593162</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Current TD: 8.593162</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; BUILD initialization method (parallel version) finished. Elapsed time: 0.0247791 s</span></span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Time summary  (parallel implementation with 128 threads).</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0.0267297 s (method BUILD).</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0.0247791 s (method BUILD).</span></span>
 <span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Optimization:  0 s in 0 iterations.</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.0267297 s (0 minutes, 0.0267297 seconds).</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.0247791 s (0 minutes, 0.0247791 seconds).</span></span>
 <span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>Llab1<span class="ot">=</span><span class="fu">ApplyPAM</span>(<span class="st">&quot;datatestL2.bin&quot;</span>,<span class="at">k=</span><span class="dv">5</span>,<span class="at">init_method=</span><span class="st">&quot;LAB&quot;</span>,<span class="at">max_iter=</span><span class="dv">0</span>)</span>
 <span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Reading symmetric distance/dissimilarity matrix datatestL2.bin</span></span>
 <span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Package memuse is installed. OK.</span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 250537124 Kib.</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 255140300 Kib.</span></span>
 <span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   That seems OK.</span></span>
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Matrix is a correct distance/dissimilarity matrix.</span></span>
 <span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Starting LAB initialization method, serial version.</span></span>
 <span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">WARNING</span><span class="co">: all successive messages use R-numbering (from 1) for points and medoids. Substract 1 to get the internal C-numbers.</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 1. Medoid 1 found. Point 903. TD=8.862031</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 2. Medoid 2 found. Point 1435. 2608 reassigned points. TD=8.741199</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 3. Medoid 3 found. Point 405. 1302 reassigned points. TD=8.699165</span></span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 4. Medoid 4 found. Point 2378. 851 reassigned points. TD=8.674267</span></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 5. Medoid 5 found. Point 3943. 500 reassigned points. TD=8.660294</span></span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Current TD: 8.660294</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; LAB initialization method (serial version) finished. Elapsed time: 0.00197204 s</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 1. Medoid 1 found. Point 792. TD=8.925329</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 2. Medoid 2 found. Point 4686. 2438 reassigned points. TD=8.813318</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 3. Medoid 3 found. Point 1766. 2233 reassigned points. TD=8.728142</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 4. Medoid 4 found. Point 1484. 1077 reassigned points. TD=8.695348</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 5. Medoid 5 found. Point 2845. 1289 reassigned points. TD=8.655130</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Current TD: 8.655130</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; LAB initialization method (serial version) finished. Elapsed time: 0.00149603 s</span></span>
 <span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Time summary  (parallel implementation with 128 threads).</span></span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0.00197204 s (method LAB).</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0.00149603 s (method LAB).</span></span>
 <span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Optimization:  0 s in 0 iterations.</span></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.00197204 s (0 minutes, 0.00197204 seconds).</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.00149603 s (0 minutes, 0.00149603 seconds).</span></span>
 <span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>Llab2<span class="ot">=</span><span class="fu">ApplyPAM</span>(<span class="st">&quot;datatestL2.bin&quot;</span>,<span class="at">k=</span><span class="dv">5</span>,<span class="at">init_method=</span><span class="st">&quot;LAB&quot;</span>,<span class="at">max_iter=</span><span class="dv">0</span>)</span>
 <span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Reading symmetric distance/dissimilarity matrix datatestL2.bin</span></span>
 <span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Package memuse is installed. OK.</span></span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 250541000 Kib.</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 255146656 Kib.</span></span>
 <span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   That seems OK.</span></span>
 <span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Matrix is a correct distance/dissimilarity matrix.</span></span>
 <span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Starting LAB initialization method, serial version.</span></span>
 <span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">WARNING</span><span class="co">: all successive messages use R-numbering (from 1) for points and medoids. Substract 1 to get the internal C-numbers.</span></span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 1. Medoid 1 found. Point 1851. TD=8.883654</span></span>
-<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 2. Medoid 2 found. Point 4594. 2518 reassigned points. TD=8.771717</span></span>
-<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 3. Medoid 3 found. Point 1964. 1582 reassigned points. TD=8.720688</span></span>
-<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 4. Medoid 4 found. Point 3873. 1520 reassigned points. TD=8.670401</span></span>
-<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 5. Medoid 5 found. Point 2234. 778 reassigned points. TD=8.648890</span></span>
-<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Current TD: 8.648890</span></span>
-<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; LAB initialization method (serial version) finished. Elapsed time: 0.0018855 s</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 1. Medoid 1 found. Point 2513. TD=8.846938</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 2. Medoid 2 found. Point 2618. 2605 reassigned points. TD=8.726472</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 3. Medoid 3 found. Point 4739. 1319 reassigned points. TD=8.683601</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 4. Medoid 4 found. Point 637. 949 reassigned points. TD=8.656659</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Looking for medoid 5. Medoid 5 found. Point 4466. 791 reassigned points. TD=8.635935</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Current TD: 8.635935</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; LAB initialization method (serial version) finished. Elapsed time: 0.00141748 s</span></span>
 <span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Time summary  (parallel implementation with 128 threads).</span></span>
-<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0.0018855 s (method LAB).</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0.00141748 s (method LAB).</span></span>
 <span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Optimization:  0 s in 0 iterations.</span></span>
-<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.0018855 s (0 minutes, 0.0018855 seconds).</span></span></code></pre></div>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.00141748 s (0 minutes, 0.00141748 seconds).</span></span></code></pre></div>
 <p>As it can be seen, to get and compare different initializations you must set the parameter <code>max_iter</code> to the value <code>0</code>. In this case no iterations of objective function reduction are performed, and the returned object contains the initial medoids and the classification induced by them. Notice that even looking equal, the results of the latter two calls are different since <code>LAB</code> initializes with a random component (the sample to choose initial medoids is chosen randomly).</p>
 <p>You can check that the medoids, stored in <code>Llab1$med</code> and <code>Llab2$med</code> (see more on this below) are in general different.</p>
 <p>Now, these results can be used to initialize <code>PAM</code> if you find that any of them contains a specially good set of medoids. This is the role of method <code>PREV</code> that we have mentioned before. A typical call would be</p>
@@ -363,21 +363,21 @@ div.csl-indent {
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">initial_med=</span>Llab2<span class="sc">$</span>med)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Reading symmetric distance/dissimilarity matrix datatestL2.bin</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Package memuse is installed. OK.</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 250540904 Kib.</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 255166524 Kib.</span></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   That seems OK.</span></span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Matrix is a correct distance/dissimilarity matrix.</span></span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Starting improved FastPAM1 method in parallel implementation with 128 threads.</span></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">WARNING</span><span class="co">: all successive messages use R-numbering (from 1) for points and medoids. Substract 1 to get the internal C-numbers.</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 0. Medoid at place 5 (point 2234) swapped with point 1875; TD-change=-0.029909; TD=8.618962. 1586 reassigned points.</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 1. Medoid at place 3 (point 1964) swapped with point 1157; TD-change=-0.012263; TD=8.606699. 1270 reassigned points.</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 2. Medoid at place 2 (point 4594) swapped with point 4697; TD-change=-0.009337; TD=8.597362. 1157 reassigned points.</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 3. Medoid at place 1 (point 1852) swapped with point 1435; TD-change=-0.005568; TD=8.591794. 1141 reassigned points.</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 4.    Exiting, since DeltaTDst is 0.000000. Final value of TD is 8.591794</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Optimization method (parallel version) finished. Elapsed time: 0.0294714 s</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 0. Medoid at place 5 (point 4466) swapped with point 2576; TD-change=-0.016098; TD=8.619813. 1397 reassigned points.</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 1. Medoid at place 4 (point 637) swapped with point 436; TD-change=-0.013280; TD=8.606532. 1244 reassigned points.</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 2. Medoid at place 3 (point 4739) swapped with point 3015; TD-change=-0.010419; TD=8.596113. 1196 reassigned points.</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 3. Medoid at place 1 (point 2514) swapped with point 1685; TD-change=-0.002959; TD=8.593154. 1267 reassigned points.</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 4.    Exiting, since DeltaTDst is 0.000000. Final value of TD is 8.593154</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Optimization method (parallel version) finished. Elapsed time: 0.02636 s</span></span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Time summary  (parallel implementation with 128 threads).</span></span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0 s (method PREV).</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Optimization:  0.0294714 s in 3 iterations (0.0098238 seconds/iteration).</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.0294714 s (0 minutes, 0.0294714 seconds).</span></span></code></pre></div>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Optimization:  0.02636 s in 3 iterations (0.00878666 seconds/iteration).</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.02636 s (0 minutes, 0.02636 seconds).</span></span></code></pre></div>
 <p>The initial set of medoids is taken from the object returned by the former calls.</p>
 <p>With respect to that object, as we said it is a list with two vectors. The first one, <code>L$med</code>, has as many components as requested medoids and the second, <code>L$clasif</code>, has as many components as instances.</p>
 <p>Medoids are expressed in <code>L$med</code> by its number in the array of vectors (row number in the dissimilarity matrix) starting at 1 (<code>R</code> convention).</p>
@@ -385,8 +385,8 @@ div.csl-indent {
 <p>This means that if <code>L$clasif[p]</code> is <code>m</code>, the point <code>p</code> belongs to the class grouped around medoid <code>L$med[m]</code>. Let us see it.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Which are the indexes of the points chosen as medoids?</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>L<span class="sc">$</span>med</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; V1875 V4697 V1157 V3873 V1435 </span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1875  4697  1157  3873  1435</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; V2618 V2576  V436 V3015 V1685 </span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2618  2576   436  3015  1685</span></span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># In which class has point 147 been classified?</span></span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>L<span class="sc">$</span>clasif[<span class="dv">147</span>]</span>
@@ -396,9 +396,9 @@ div.csl-indent {
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># And which is the index (row in the dissimilarity matrix)</span></span>
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co"># of the medoid closest to point 147?</span></span>
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>L<span class="sc">$</span>med[L<span class="sc">$</span>clasif[<span class="dv">147</span>]]</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; V1875 </span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1875</span></span></code></pre></div>
-<p>In this way, values in <code>L$clasif</code> are between 1 and the number of medoids, as we can see.</p>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; V2618 </span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2618</span></span></code></pre></div>
+<p>In this way, values in <code>L$clasif</code> are between 1 and the number of medoids, as we can see:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">min</span>(L<span class="sc">$</span>clasif)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(L<span class="sc">$</span>clasif)</span>
@@ -411,11 +411,11 @@ div.csl-indent {
 <p>This is characterized by the silhouette of each point. Three functions deal with this: <code>CalculateSilhouette</code>, <code>FilterBySilhouetteQuantile</code> and <code>FilterBySilhouetteThreshold</code>.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>S<span class="ot">=</span><span class="fu">CalculateSilhouette</span>(Llab2<span class="sc">$</span>clasif,<span class="st">&quot;datatestL2.bin&quot;</span>,<span class="at">nthreads=</span><span class="dv">0</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Package memuse is installed. OK.</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 250529188 Kib.</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 48837 KiB, which is 0.01% of the available memory, which is 255165932 Kib.</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   That seems OK.</span></span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Calculating silhouette (parallel version) with 128 threads.</span></span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5000 points classified in 5 classes.</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Finished parallel implementation of silhouette (including dissimilarity matrix load). Elapsed time: 0.0316272 s</span></span></code></pre></div>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Finished parallel implementation of silhouette (including dissimilarity matrix load). Elapsed time: 0.034496 s</span></span></code></pre></div>
 <p>The parameters to function <code>CalculateSilhouette</code> are the array of class membership, as returned by <code>ApplyPAM</code> in its <code>clasif</code> field, and the file with the matrix of dissimilarities.</p>
 <p>A parallel implementation has been programmed, being nthreads as explained before.</p>
 <p>Silhouette is a number in <span class="math inline">\([-1,1]\)</span>; the higher its value, the most centered a point is in its cluster.</p>
@@ -448,22 +448,55 @@ div.csl-indent {
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">init_method=</span><span class="st">&quot;PREV&quot;</span>,<span class="at">initial_med=</span>Lfilt<span class="sc">$</span>med)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Reading symmetric distance/dissimilarity matrix datatestL2Filt.bin</span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Package memuse is installed. OK.</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 31257 KiB, which is 0.01% of the available memory, which is 250458232 Kib.</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Memory used by the matrix: 31242 KiB, which is 0.01% of the available memory, which is 255089096 Kib.</span></span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   That seems OK.</span></span>
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Matrix is a correct distance/dissimilarity matrix.</span></span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Starting improved FastPAM1 method in parallel implementation with 128 threads.</span></span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">WARNING</span><span class="co">: all successive messages use R-numbering (from 1) for points and medoids. Substract 1 to get the internal C-numbers.</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 0. Medoid at place 5 (point 1806) swapped with point 1526; TD-change=-0.022872; TD=8.610044. 1189 reassigned points.</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 1. Medoid at place 3 (point 1596) swapped with point 3758; TD-change=-0.009268; TD=8.600778. 979 reassigned points.</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 2. Medoid at place 1 (point 1510) swapped with point 1175; TD-change=-0.006698; TD=8.594079. 954 reassigned points.</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 3. Medoid at place 2 (point 3676) swapped with point 2913; TD-change=-0.002500; TD=8.591579. 892 reassigned points.</span></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 4.    Exiting, since DeltaTDst is 0.000000. Final value of TD is 8.591579</span></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Optimization method (parallel version) finished. Elapsed time: 0.025877 s</span></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Time summary  (parallel implementation with 128 threads).</span></span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0 s (method PREV).</span></span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Optimization:  0.025877 s in 3 iterations (0.00862568 seconds/iteration).</span></span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.025877 s (0 minutes, 0.025877 seconds).</span></span></code></pre></div>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 0. Medoid at place 5 (point 3566) swapped with point 346; TD-change=-0.011013; TD=8.607126. 978 reassigned points.</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 1. Medoid at place 4 (point 503) swapped with point 2413; TD-change=-0.009426; TD=8.597700. 917 reassigned points.</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 2. Medoid at place 3 (point 3792) swapped with point 3649; TD-change=-0.006331; TD=8.591370. 972 reassigned points.</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Iteration 3.    Exiting, since DeltaTDst is 0.000000. Final value of TD is 8.591370</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Optimization method (parallel version) finished. Elapsed time: 0.0193672 s</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Time summary  (parallel implementation with 128 threads).</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Initalization: 0 s (method PREV).</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Optimization:  0.0193672 s in 2 iterations (0.00968361 seconds/iteration).</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Total time:    0.0193672 s (0 minutes, 0.0193672 seconds).</span></span></code></pre></div>
 <p>Of course, we might have used simply 5 as number of medoids, <code>k</code>, since this does not change by filtering, but this is to emphasize the fact that <code>ApplyPAM</code> with method <code>PREV</code> requires both parameters to be consistent.</p>
+</div>
+<div id="comparison-with-other-pam-implementations" class="section level2">
+<h2>Comparison with other PAM implementations</h2>
+<p>The user might want to compare this PAM implementation with others provided for instance by packages <code>cluster</code> (<span class="citation">Maechler et al. (2022)</span>) or <code>ClusterR</code> (<span class="citation">Mouselimis (2023)</span>). In <code>cluster</code> the input is either the data matrix (so the distance matrix is calculated inside the pam function) or directly the distance matrix but as a R vector with the lower-diagonal part of the symmetric matrix ordered by columns (i.e.: column 1 from M(2,1) to M(n,1), followed by column 2 from M(3,2) to M(n,2) and so on, up to M(n,n-1). This is a vector of <span class="math inline">\(n(n-1)/2\)</span> components. To facilitate such comparison the function <code>GetSubdiag</code> is provided which takes as input the jmatrix file with the distance matrix and returns the vector to be passed to pam in the aforementioned packages.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">GetSubdiag</span>(<span class="st">&quot;datatestL2.bin&quot;</span>)</span></code></pre></div>
+<p>Then, explicit comparison could be done with:</p>
+<p>(Sorry, we can’t try ourselves since we don’t know if cluster is installed in your system and the CRAN check does not allow the use of installed.packages to test it)</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cluster)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>clusterpam <span class="ot">=</span> <span class="fu">pam</span>(d,<span class="at">diss=</span><span class="cn">TRUE</span>,<span class="at">k=</span><span class="dv">5</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sort</span>(clusterpam<span class="sc">$</span>id.med))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sort</span>(L<span class="sc">$</span>med))</span></code></pre></div>
+<p>Similarly, you can check against the ClusterR package. In this package you need the complete dissimilarity matrix to be passed so we have to get it:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Be patient, this may take some time...</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>Dm <span class="ot">=</span> <span class="fu">GetJManyRows</span>(<span class="st">&quot;datatestL2.bin&quot;</span>,<span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span>nvec))</span></code></pre></div>
+<p>and then</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ClusterR)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>ClusterRpam <span class="ot">=</span> <span class="fu">Cluster_Medoids</span>(Dm,<span class="at">clusters=</span><span class="dv">5</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sort</span>(ClusterRpam<span class="sc">$</span>medoid_indices))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sort</span>(L<span class="sc">$</span>med))</span></code></pre></div>
+<p>In all cases we tried with this simple (but random) example results were the same. In other cases with a large number of points some medoids were different in the different implementations but the value of the function to minimize (sum of distances) was always the same, indicating that they were equivalent minima. You can test this with function <code>GetTD</code> as follows:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>TDparallelpam <span class="ot">=</span> <span class="fu">GetTD</span>(L,<span class="st">&quot;datatestL2.bin&quot;</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># This is to adapt cluster package output format to ours, since this is what our GetTD function expects...</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>Lcl <span class="ot">=</span> <span class="fu">list</span>()</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>Lcl<span class="sc">$</span>med <span class="ot">=</span> clusterpam<span class="sc">$</span>id.med</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>Lcl<span class="sc">$</span>clasif <span class="ot">=</span> clusterpam<span class="sc">$</span>clustering</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>TDcluster <span class="ot">=</span> <span class="fu">GetTD</span>(Lcl,<span class="st">&quot;datatestL2.bin&quot;</span>)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co"># The same with ClusterR package:</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>LclR <span class="ot">=</span> <span class="fu">list</span>()</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>LclR<span class="sc">$</span>med <span class="ot">=</span> ClusterRpam<span class="sc">$</span>medoid_indices</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>LclR<span class="sc">$</span>clasif <span class="ot">=</span> ClusterRpam<span class="sc">$</span>clusters</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>TDClusterR <span class="ot">=</span> <span class="fu">GetTD</span>(LclR,<span class="st">&quot;datatestL2.bin&quot;</span>)</span></code></pre></div>
+<p>and see that variables <code>TDparallelpam</code>, <code>TDcluster</code> and <code>TDClusterR</code> are equal.</p>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-R-jmatrix" class="csl-entry">
 Domingo, Juan. 2022a. <em>Jmatrix: Read from/Write to Disk Matrices with Any Data Type in a Binary Format</em>.
@@ -476,6 +509,9 @@ Domingo, Juan. 2022a. <em>Jmatrix: Read from/Write to Disk Matrices with Any Dat
 </div>
 <div id="ref-R-cluster" class="csl-entry">
 Maechler, Martin, Peter Rousseeuw, Anja Struyf, Mia Hubert, and Kurt Hornik. 2022. <em>Cluster: Cluster Analysis Basics and Extensions</em>. <a href="https://CRAN.R-project.org/package=cluster">https://CRAN.R-project.org/package=cluster</a>.
+</div>
+<div id="ref-R-ClusterR" class="csl-entry">
+Mouselimis, Lampros. 2023. <em><span>ClusterR</span>: Gaussian Mixture Models, k-Means, Mini-Batch-Kmeans, k-Medoids and Affinity Propagation Clustering</em>. <a href="https://CRAN.R-project.org/package=ClusterR">https://CRAN.R-project.org/package=ClusterR</a>.
 </div>
 <div id="ref-Schubert2019" class="csl-entry">
 Schubert, Erich, and Peter J. Rousseeuw. 2019. <span>“Faster k-Medoids Clustering: Improving the <span>PAM</span>, <span>CLARA</span>, and <span>CLARANS</span> Algorithms.”</span> In <em>Similarity Search and Applications</em>, 171–87. Springer International Publishing. <a href="https://doi.org/10.1007/978-3-030-32047-8_16">https://doi.org/10.1007/978-3-030-32047-8_16</a>.

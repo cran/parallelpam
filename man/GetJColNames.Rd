@@ -10,7 +10,7 @@ GetJColNames(fname)
 \item{fname}{String with the file name that contains the binary data.}
 }
 \value{
-A R StringVector with the column names, or the empty vector if the binaryfile has no row column names as metadata.
+A R StringVector with the column names, or the empty vector if the binaryfile has no column names as metadata.
 }
 \description{
 Returns a R StringVector with the column names of a matrix stored in the binary format of package jmatrix, if it has them stored.
@@ -19,8 +19,8 @@ Returns a R StringVector with the column names of a matrix stored in the binary 
 Rf <- matrix(runif(48),nrow=6)
 rownames(Rf) <- c("A","B","C","D","E","F")
 colnames(Rf) <- c("a","b","c","d","e","f","g","h")
-JWriteBin(Rf,"Rfullfloat.bin",dtype="float",dmtype="full",comment="Full matrix of floats")
-cn<-GetJColNames("Rfullfloat.bin")
+tmpfile1=paste0(tempdir(),"/Rfullfloat.bin")
+JWriteBin(Rf,tmpfile1,dtype="float",dmtype="full",comment="Full matrix of floats")
+cn<-GetJColNames(tmpfile1)
 cn
-file.remove("Rfullfloat.bin")
 }

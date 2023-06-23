@@ -23,8 +23,8 @@ ndim<-500
 P<-matrix(runif(nvec*ndim),nrow=nvec)
 rownames(P)<-paste0("V",1:nvec)
 colnames(P)<-paste0("d",1:ndim)
-## Write it to disk as a binary file in JMatrix format. Please,
-## see vignette of package jmatrix.
+# Write it to disk as a binary file in jmatrix format. Please,
+# see vignette jmatrixpp.
 JWriteBin(P,"datatest.bin",dtype="float",dmtype="full",
           comment="Synthetic problem data to test PAM")
 
@@ -84,4 +84,38 @@ Lfilt=FilterBySilhouetteQuantile(S,Llab2,"datatest.bin",
 ## -----------------------------------------------------------------------------
 Lfinal=ApplyPAM("datatestL2Filt.bin",k=length(Lfilt$med),
                 init_method="PREV",initial_med=Lfilt$med)
+
+## ---- results='hide'----------------------------------------------------------
+d = GetSubdiag("datatestL2.bin")
+
+## ---- eval=FALSE--------------------------------------------------------------
+#  library(cluster)
+#  clusterpam = pam(d,diss=TRUE,k=5)
+#  print(sort(clusterpam$id.med))
+#  print(sort(L$med))
+
+## ---- eval=FALSE--------------------------------------------------------------
+#  # Be patient, this may take some time...
+#  Dm = GetJManyRows("datatestL2.bin",seq(1:nvec))
+
+## ---- eval=FALSE--------------------------------------------------------------
+#  library(ClusterR)
+#  ClusterRpam = Cluster_Medoids(Dm,clusters=5)
+#  print(sort(ClusterRpam$medoid_indices))
+#  print(sort(L$med))
+
+## ---- eval=FALSE--------------------------------------------------------------
+#  TDparallelpam = GetTD(L,"datatestL2.bin")
+#  
+#  # This is to adapt cluster package output format to ours, since this is what our GetTD function expects...
+#  Lcl = list()
+#  Lcl$med = clusterpam$id.med
+#  Lcl$clasif = clusterpam$clustering
+#  TDcluster = GetTD(Lcl,"datatestL2.bin")
+#  
+#  # The same with ClusterR package:
+#  LclR = list()
+#  LclR$med = ClusterRpam$medoid_indices
+#  LclR$clasif = ClusterRpam$clusters
+#  TDClusterR = GetTD(LclR,"datatestL2.bin")
 
