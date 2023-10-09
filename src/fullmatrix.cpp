@@ -128,6 +128,9 @@ FullMatrix<T>::FullMatrix(std::string fname) : JMatrix<T>(fname,MTYPEFULL)
     this->ReadMetadata();                  // This is exclusively used when reading from a binary file, not from a csv file
       
     this->ifile.close();
+    
+    if (DEB & DEBJM)
+     Rcpp::Rcout << "Read full matrix with size (" << this->nr << "," << this->nc << ")\n";
 }
 
 TEMPLATES_CONST(FullMatrix,std::string fname)
@@ -503,14 +506,16 @@ void FullMatrix<T>::WriteCsv(std::string fname,char csep,bool withquotes)
      with_headers=true;
     }
     
+    int p = std::numeric_limits<T>::max_digits10;
+    
     for (indextype r=0;r<this->nr;r++)
     {
         if (with_headers)
             this->ofile << FixQuotes(this->rownames[r],withquotes) << csep;
-            
+        
         for (indextype c=0;c<this->nc-1;c++)
-            this->ofile << ((data[r][c]<1E-10) ? 0 : data[r][c] ) << csep;
-        this->ofile << ((data[r][this->nc-1]<1E-10) ? 0 : data[r][this->nc-1] ) << std::endl; 
+            this->ofile << std::setprecision(p) << data[r][c]  << csep;
+        this->ofile << std::setprecision(p) << data[r][this->nc-1] << std::endl; 
     }
     this->ofile.close();
 }

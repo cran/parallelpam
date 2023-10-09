@@ -384,6 +384,7 @@ class JMatrix
  	std::ofstream ofile;
  	unsigned char TypeNameToId();
  	bool ProcessDataLineCsv(std::string line,char csep,T *rowofdata);
+ 	bool ProcessDataLineCsvForSymmetric(std::string line,char csep,indextype nrow,std::vector<T> &rowofdata);
  	int ReadMetadata();
  	void WriteMetadata();
  	std::vector<std::string> rownames;

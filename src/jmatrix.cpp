@@ -341,14 +341,13 @@ bool JMatrix<T>::ProcessDataLineCsv(std::string line, char csep,T *rowofdata)
     while ((pos=line.find(delim)) != std::string::npos)
     {
      token=line.substr(0,pos);
-     rowofdata[p]=atof(token.c_str());
+     rowofdata[p]=T(atof(token.c_str()));
      p++;
      line.erase(0,pos+1);
     }
     if (p!=nc-1)
         return false;
-    rowofdata[p]=atof(line.c_str());
-    p++;
+    rowofdata[p]=T(atof(line.c_str()));
     
     return true;
 }
@@ -364,6 +363,52 @@ template bool JMatrix<long>::ProcessDataLineCsv(std::string line, char csep,long
 template bool JMatrix<float>::ProcessDataLineCsv(std::string line, char csep,float *rowofdata);
 template bool JMatrix<double>::ProcessDataLineCsv(std::string line, char csep,double *rowofdata);
 template bool JMatrix<long double>::ProcessDataLineCsv(std::string line, char csep,long double *rowofdata);
+
+//////////////////////
+
+template<typename T>
+bool JMatrix<T>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<T> &rowofdata)
+{
+    std::string delim=" ";
+    delim[0]=csep;
+ 
+    std::string token,tt;
+    
+    // This reads the first token, which is the row name
+    size_t pos=line.find(delim);
+    token=line.substr(0,pos);
+    rownames.push_back(token);
+    line.erase(0,pos+1);
+    
+    size_t p=0;
+    while ((pos=line.find(delim)) != std::string::npos)
+    {
+     token=line.substr(0,pos);
+     // Only columns 0 to rnum (included) are stored. The other are read, but ignored.
+     if (p<=rnum)
+      rowofdata[p]=T(atof(token.c_str()));
+     p++;
+     line.erase(0,pos+1);
+    }
+    if (p!=nc-1)
+        return false;
+    if (rnum==(nc-1))
+        rowofdata[p]=T(atof(line.c_str()));
+    
+    return true;
+}
+
+template bool JMatrix<unsigned char>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<unsigned char> &rowofdata);
+template bool JMatrix<char>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<char> &rowofdata);
+template bool JMatrix<unsigned short>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<unsigned short> &rowofdata);
+template bool JMatrix<short>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<short> &rowofdata);
+template bool JMatrix<unsigned int>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<unsigned int> &rowofdata);
+template bool JMatrix<int>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<int> &rowofdata);
+template bool JMatrix<unsigned long>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<unsigned long> &rowofdata);
+template bool JMatrix<long>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<long> &rowofdata);
+template bool JMatrix<float>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<float> &rowofdata);
+template bool JMatrix<double>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<double> &rowofdata);
+template bool JMatrix<long double>::ProcessDataLineCsvForSymmetric(std::string line, char csep,indextype rnum,std::vector<long double> &rowofdata);
 
 ////////////////////////////////////////////
 
@@ -394,7 +439,7 @@ JMatrix<T>::JMatrix(std::string fname,unsigned char mtype,unsigned char valuetyp
      Rcpp::stop(err);
  }
  if (DEB & DEBJM)
-     Rcpp::Rcout << nc+1 << " columns (excluding column of names) in file " << fname << ".\n";
+     Rcpp::Rcout << nc << " columns of values (not including the column of names) in file " << fname << ".\n";
 }
 
 TEMPLATES_CONST(JMatrix,SINGLE_ARG(std::string fname,unsigned char mtype,unsigned char valuetype,char csep))

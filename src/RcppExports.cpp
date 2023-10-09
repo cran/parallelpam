@@ -10,6 +10,36 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// CsvToJMat
+void CsvToJMat(std::string ifname, std::string ofname, std::string mtype, char csep, std::string ctype, std::string valuetype, bool transpose, std::string comment);
+RcppExport SEXP _parallelpam_CsvToJMat(SEXP ifnameSEXP, SEXP ofnameSEXP, SEXP mtypeSEXP, SEXP csepSEXP, SEXP ctypeSEXP, SEXP valuetypeSEXP, SEXP transposeSEXP, SEXP commentSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type ifname(ifnameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type ofname(ofnameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type mtype(mtypeSEXP);
+    Rcpp::traits::input_parameter< char >::type csep(csepSEXP);
+    Rcpp::traits::input_parameter< std::string >::type ctype(ctypeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type valuetype(valuetypeSEXP);
+    Rcpp::traits::input_parameter< bool >::type transpose(transposeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type comment(commentSEXP);
+    CsvToJMat(ifname, ofname, mtype, csep, ctype, valuetype, transpose, comment);
+    return R_NilValue;
+END_RCPP
+}
+// JMatToCsv
+void JMatToCsv(std::string ifile, std::string csvfile, char csep, bool withquotes);
+RcppExport SEXP _parallelpam_JMatToCsv(SEXP ifileSEXP, SEXP csvfileSEXP, SEXP csepSEXP, SEXP withquotesSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type ifile(ifileSEXP);
+    Rcpp::traits::input_parameter< std::string >::type csvfile(csvfileSEXP);
+    Rcpp::traits::input_parameter< char >::type csep(csepSEXP);
+    Rcpp::traits::input_parameter< bool >::type withquotes(withquotesSEXP);
+    JMatToCsv(ifile, csvfile, csep, withquotes);
+    return R_NilValue;
+END_RCPP
+}
 // ParallelpamSetDebug
 void ParallelpamSetDebug(bool deb, bool debjmat);
 RcppExport SEXP _parallelpam_ParallelpamSetDebug(SEXP debSEXP, SEXP debjmatSEXP) {
@@ -33,6 +63,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type comment(commentSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     CalcAndWriteDissimilarityMatrix(ifname, ofname, distype, restype, comment, nthreads);
+    return R_NilValue;
+END_RCPP
+}
+// FilterJMatByName
+void FilterJMatByName(std::string fname, Rcpp::StringVector Gn, std::string filname, std::string namesat);
+RcppExport SEXP _parallelpam_FilterJMatByName(SEXP fnameSEXP, SEXP GnSEXP, SEXP filnameSEXP, SEXP namesatSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type fname(fnameSEXP);
+    Rcpp::traits::input_parameter< Rcpp::StringVector >::type Gn(GnSEXP);
+    Rcpp::traits::input_parameter< std::string >::type filname(filnameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type namesat(namesatSEXP);
+    FilterJMatByName(fname, Gn, filname, namesat);
     return R_NilValue;
 END_RCPP
 }
@@ -304,8 +347,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_parallelpam_CsvToJMat", (DL_FUNC) &_parallelpam_CsvToJMat, 8},
+    {"_parallelpam_JMatToCsv", (DL_FUNC) &_parallelpam_JMatToCsv, 4},
     {"_parallelpam_ParallelpamSetDebug", (DL_FUNC) &_parallelpam_ParallelpamSetDebug, 2},
     {"_parallelpam_CalcAndWriteDissimilarityMatrix", (DL_FUNC) &_parallelpam_CalcAndWriteDissimilarityMatrix, 6},
+    {"_parallelpam_FilterJMatByName", (DL_FUNC) &_parallelpam_FilterJMatByName, 4},
     {"_parallelpam_FilterBySilhouetteQuantile", (DL_FUNC) &_parallelpam_FilterBySilhouetteQuantile, 8},
     {"_parallelpam_FilterBySilhouetteThreshold", (DL_FUNC) &_parallelpam_FilterBySilhouetteThreshold, 8},
     {"_parallelpam_ClassifAsDataFrame", (DL_FUNC) &_parallelpam_ClassifAsDataFrame, 2},

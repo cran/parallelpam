@@ -800,14 +800,16 @@ void SparseMatrix<T>::WriteCsv(std::string fname,char csep,bool withquotes)
      with_headers=true;
     }
    
+    int p = std::numeric_limits<T>::max_digits10;
+    
     for (indextype r=0;r<this->nr;r++)
     {
         if (with_headers)
             this->ofile << FixQuotes(this->rownames[r],withquotes) << csep;
-           
+
         for (indextype c=0;c<this->nc-1;c++)
-            this->ofile << Get(r,c) << csep;
-        this->ofile << Get(r,this->nc-1) << std::endl;
+            this->ofile << std::setprecision(p) << Get(r,c) << csep;
+        this->ofile << std::setprecision(p) << Get(r,this->nc-1) << std::endl;
     }
     this->ofile.close();
 }
