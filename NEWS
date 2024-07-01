@@ -20,3 +20,12 @@ Version 1.4 [2023-09-08]
 * Added function to filter rows or columns by their names directly from jmatrix files to create a new jmatrix file 
 * Added possibility of reading symmetric matrices from .csv or .tsv files
 
+Version 1.4.1 [2023-10-12]
+* Read/write to/from .csv or .tsv checked to avoid strange behaviours when .csv has no row and/or column names.
+
+Version 1.4.2 [2024-07-01]
+* Added the inclusion of pthread.h in several .cpp files to prevent a compilation failure using LLVM that does not happen with gcc.
+  Thanks to Tomas Kalibera for his kind notice.
+* Suppressed a line in silhouette.cpp that used a function from the class Rcpp::Language wich internally calls
+  funcion SET_TYPEOF which, according to the R sources (see src/include/Rinternals.h) shouldn't be in the API
+  and since June, 2023 seems to have been taken by the CRAN maintainers as a failure.

@@ -17,6 +17,7 @@
  */
 
 #include <threadhelper.h>
+#include <pthread.h>
 
 // Auxiliary function to decide the number of threads
 unsigned int ChooseNumThreads(int nthreads)
@@ -36,7 +37,7 @@ unsigned int ChooseNumThreads(int nthreads)
   {
    std::ostringstream warst;
    warst << "You have requested " << nthreads << " threads but this machine has only " << nthc << " cores. This is allowed, but discouraged.\n";
-   Rcpp::warning(warst.str());
+   Rcpp::warning("%s",warst.str().c_str());
   }
   nt=nthreads;
  }

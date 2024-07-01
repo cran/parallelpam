@@ -284,6 +284,17 @@ std::vector<std::string> JMatrix<T>::GetRowNames()
 
 TEMPLATES_FUNC(std::vector<std::string>,JMatrix,GetRowNames,)
 
+////////////////////////////////////////////////////////////////////////
+template<typename T>
+std::string JMatrix<T>::CleanQuotes(std::string s)
+{
+ std::string r=s;
+ if (s[0]=='\"')
+  r=r.substr(1);
+ if (r[r.size()-1]=='\"')
+  r=r.substr(0,r.size()-1);
+ return r;
+}
 
 ////////////////////////////////////////////////////////////////////////
 template <typename T>
@@ -304,17 +315,17 @@ bool JMatrix<T>::ProcessFirstLineCsv(std::string line,char csep)
      std::remove_copy(token.begin(),token.end(),std::back_inserter(tt),'\"');
      // Some people inserts a word before the first tab in the first line, even that word CANNOT BE the header of any column...
      //if ( ( p==0 && tt!="" ) || ( p!=0 && tt=="" ) )
-     if (p!=0 && tt=="")
+     if ( ( p==0 && tt!="" ) || ( p!=0 && tt=="" ) )
      {
-         Rcpp::Rcerr << "Returning false with p=" << p << "\n";
+         Rcpp::Rcerr << "Returning false when processing first line of csv with p=" << p << "\n";
          return false;
      }
-     // Each token (except the first one) is stored as a column name
+     // Each token (except the first one) is stored as a column name (without the quotes, if it has them...)
      if (p>0)
-      colnames.push_back(token);
+      colnames.push_back(CleanQuotes(token));
      p++;
  }
- colnames.push_back(line);
+ colnames.push_back(CleanQuotes(line));
  nc=colnames.size();
  return true;
 }
@@ -334,7 +345,7 @@ bool JMatrix<T>::ProcessDataLineCsv(std::string line, char csep,T *rowofdata)
     // This reads the first token, which is the row name
     size_t pos=line.find(delim);
     token=line.substr(0,pos);
-    rownames.push_back(token);
+    rownames.push_back(CleanQuotes(token));
     line.erase(0,pos+1);
     
     size_t p=0;
@@ -563,7 +574,7 @@ TEMPLATES_OPERATOR(JMatrix,!=)
 
 /////////////////////////////////////////////////////////////////////
 
-// Function to write the matrix as CSV file. It just opens the file
+// Function to write the matrix as CSV file. It opens the file and write the csv header (first line)
 template <typename T>
 void JMatrix<T>::WriteCsv(std::string fname,char csep,bool withquotes)
 {
@@ -573,16 +584,41 @@ void JMatrix<T>::WriteCsv(std::string fname,char csep,bool withquotes)
     std::string err = "Error: cannot open file "+fname+" to write the matrix.\n";
     Rcpp::stop(err);
  }
- if (mdinfo & COL_NAMES)
+ if (this->nc==0)
  {
-  if (withquotes)
+  Rcpp::warning("This matrix has no columns. The .csv will be just an empty file.\n");
+  return;
+ }
+ 
+ if (
+     ((mdinfo & ROW_NAMES) && (nr != rownames.size())) ||
+     ((mdinfo & COL_NAMES) && (nc != colnames.size()))
+    )
+  Rcpp::stop("Different size of row headers and matrix rows.\n");
+ 
+ if (withquotes)
    ofile << "\"\"" << csep;
   else
    ofile << csep;   // Blank empty field at the beginning of first line
-   
+ 
+ if (mdinfo & COL_NAMES)
+ {
   for (unsigned int i=0; i<colnames.size()-1; i++)
    ofile << FixQuotes(colnames[i],withquotes) << csep;
   ofile << FixQuotes(colnames[colnames.size()-1],withquotes) << std::endl;
+ }
+ else
+ {
+  for (unsigned int i=0; i<this->nc-1; i++)
+   if (withquotes)
+    ofile << "\"C" << i+1 << "\"" << csep;
+   else
+    ofile << "C" << i+1 << csep;
+
+  if (withquotes)
+   ofile << "\"C" << this->nc << "\"" << std::endl;
+  else
+   ofile << "C" << this->nc << std::endl;
  }
 }
 
@@ -755,7 +791,7 @@ void JMatrix<T>::WriteMetadata()
  if (mdinfo == NO_METADATA)
   return;
   
- if (mdinfo & ROW_NAMES)
+ if ((mdinfo & ROW_NAMES) && (rownames.size()>0))
  {
   if (DEB & DEBJM)
    Rcpp::Rcout << "   Writing row names (" << rownames.size() << " strings written, from " << rownames[0] << " to " << rownames[rownames.size()-1] << ").\n";
@@ -763,7 +799,7 @@ void JMatrix<T>::WriteMetadata()
   ofile.write((const char *)BLOCKSEP,BLOCKSEP_LEN);
  }
  
- if (mdinfo & COL_NAMES)
+ if ((mdinfo & COL_NAMES) && (colnames.size()>0))
  {
   if (DEB & DEBJM)
    Rcpp::Rcout << "   Writing column names (" << colnames.size() << " strings written, from " << colnames[0] << " to " << colnames[colnames.size()-1] << ").\n";
@@ -905,10 +941,15 @@ void JMatrix<T>::SetComment(std::string cm)
  }
  else
  {
-  for (size_t i=0; i<cm.size(); i++)
-   comment[i]=cm[i];
-  for (size_t i=cm.size(); i<COMMENT_SIZE; i++)
-   comment[i]='\0';
+  if (cm.size()==0)
+   mdinfo &= (~COMMENT);  // Sets the comment bit to 0 if the comment is empty.
+  else
+  {
+   for (size_t i=0; i<cm.size(); i++)
+    comment[i]=cm[i];
+   for (size_t i=cm.size(); i<COMMENT_SIZE; i++)
+    comment[i]='\0';
+  }
  }
 }
 

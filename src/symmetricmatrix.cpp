@@ -18,6 +18,7 @@
 
 #include <symmetricmatrix.h>
 
+
 extern unsigned char DEB;
 
 /****************************************
@@ -200,6 +201,12 @@ SymmetricMatrix<T>::SymmetricMatrix(std::string fname,unsigned char vtype,char c
         if (!this->ifile.eof())
             this->nr++;
     }
+    if (this->nr != this->nc)
+    {
+        std::string err = "csv table in file "+fname+" has different number of rows and columns (as inferred from its header).\n";
+        err += "   It is not square, so it cannot be stored as a symmetric matrix.\n";
+        Rcpp::stop(err);
+    }
     if (DEB & DEBJM)
     {
         Rcpp::Rcout << this->nr << " lines (excluding header) in file " << fname << std::endl;
@@ -319,7 +326,7 @@ bool SymmetricMatrix<T>::TestDistDisMat()
 TEMPLATES_FUNC(bool,SymmetricMatrix,TestDistDisMat,)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef WITH_CHECKS_MATRIXSYM
+#ifdef WITH_CHECKS_MATRIX
 template <typename T>
 T SymmetricMatrix<T>::Get(indextype r,indextype c)
 { 
@@ -339,7 +346,7 @@ TEMPLATES_FUNCR(SymmetricMatrix,Get,SINGLE_ARG(indextype r,indextype c))
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef WITH_CHECKS_MATRIXSYM
+#ifdef WITH_CHECKS_MATRIX
 template <typename T>
 void SymmetricMatrix<T>::Set(indextype r,indextype c,T v)
 {
@@ -364,7 +371,7 @@ TEMPLATES_SETFUNC(void,SymmetricMatrix,Set,SINGLE_ARG(indextype r,indextype c),v
 template <typename T>
 T SymmetricMatrix<T>::GetRowSum(indextype r)
 {
-#ifdef WITH_CHECKS_MATRIXSYM
+#ifdef WITH_CHECKS_MATRIX
     if (r>=this->nr)
     {
     	std::ostringstream errst;
@@ -423,30 +430,39 @@ TEMPLATES_FUNC(void,SymmetricMatrix,WriteBin,std::string fname)
 template <typename T>
 void SymmetricMatrix<T>::WriteCsv(std::string fname,char csep,bool withquotes)
 {
+    // Remember: this writes the header, even if there were no column names (then, the header will be "","C1","C2",...)
     ((JMatrix<T> *)this)->WriteCsv(fname,csep,withquotes);
-    
-    bool with_headers=false;
-    size_t nch=this->colnames.size();
-    size_t nrh=this->rownames.size();
-    
-    if (nch>0 && nrh>0)
+
+    // Header has been written (unless the matrix had no columns...)
+    // But if it would have columns, but no rows, there is nothing after the header. The .csv would have a single line (the header)
+    if ((this->nc==0) || (this->nr==0))
     {
-     if (nch!=this->nc || nrh!=this->nr)
-      Rcpp::warning("Different size of headers and matrix, either in rows or in columns. Headers will not be written in the .csv file.\n");
-     with_headers=true;
+     this->ofile.close();
+     return;
     }
-    
+
     int p = std::numeric_limits<T>::max_digits10;
+
+    // We have rows to write; otherwise we would have returned four lines ago...
+    indextype rns=this->rownames.size();
     
     for (indextype r=0;r<this->nr;r++)
     {
-        if (with_headers)
+        if (rns>0)
             this->ofile << FixQuotes(this->rownames[r],withquotes) << csep;
-           
+        else
+        {
+         if (withquotes)
+            this->ofile << "\"R" << r+1 << "\"";
+         else
+            this->ofile << "R" << r+1;
+         this->ofile << csep;   // Blank empty field at the beginning of each line
+        }
+
         for (indextype c=0;c<r+1;c++)
-            this->ofile << data[r][c] << csep;
+            this->ofile << std::setprecision(p) << data[r][c] << csep;
             
-        // Csv version writes all elements, event those not physically stored.
+        // Csv version writes all elements, even those not physically stored.
         for (indextype c=r+1;c<this->nr-1;c++)
             this->ofile << std::setprecision(p) << data[c][r] << csep;
         this->ofile << std::setprecision(p) << data[this->nr-1][r] << std::endl;
