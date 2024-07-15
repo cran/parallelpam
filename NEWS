@@ -29,3 +29,7 @@ Version 1.4.2 [2024-07-01]
 * Suppressed a line in silhouette.cpp that used a function from the class Rcpp::Language wich internally calls
   funcion SET_TYPEOF which, according to the R sources (see src/include/Rinternals.h) shouldn't be in the API
   and since June, 2023 seems to have been taken by the CRAN maintainers as a failure.
+
+Version 1.4.3 [2024-07-05]
+* Change in a header to avoid new warning in C++20 due to the use of template in a constructor.
+

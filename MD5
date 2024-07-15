@@ -1,14 +1,14 @@
-10af211d69717621aef00f967a165feb *DESCRIPTION
+34c70a4684e5d40dc75bca0fddd1a9ad *DESCRIPTION
 bd52d17a55907e6eef4ab1216d5cbf43 *NAMESPACE
-8d7ba0c5c50cb602a11e8ff2f5a3f0e8 *NEWS
+d0c1fa5eb16405df17d31a0abdf53541 *NEWS
 38a502c432f9434859adf5eaa15be096 *R/RcppExports.R
 059c536ca690d42dd2fa2773d8d8e074 *build/vignette.rds
 5f2a82bc107ea3650740cf9a1adeead6 *inst/doc/jmatrixpp.R
 0ec8f8f0c22b1e615e7508d3d57ccfb5 *inst/doc/jmatrixpp.Rmd
-d4a915371b2989d491c865b12e2610ba *inst/doc/jmatrixpp.html
+c0282cc86d32a65983118ac171a1584a *inst/doc/jmatrixpp.html
 dedd2667130a280b58043b0962dff0c5 *inst/doc/parallelpam.R
 ec95fd3ca8f19719af01b4ddab6dd586 *inst/doc/parallelpam.Rmd
-138f28b0aa454fb4343cd48a6323f743 *inst/doc/parallelpam.html
+d7f453805d71b96e02fccbd6910b00b9 *inst/doc/parallelpam.html
 3ac15e1a60a0f6cabac5f8c73aa9bccd *inst/include/debugpar.h
 b7d4e487db41a240fb821aff1681524c *inst/include/diftimehelper.h
 ffab003a6e32a19eec4971bb1a79050d *inst/include/dissimmat.h
@@ -18,7 +18,7 @@ ffab003a6e32a19eec4971bb1a79050d *inst/include/dissimmat.h
 9e3ae907bd1b596e82e73b854a06ddd4 *inst/include/matmetadata.h
 88b4a2bd69bd4a7590c5e65061f20850 *inst/include/memhelper.h
 c77cbe89d1474ab5a16a747a0c069c1a *inst/include/silhouette.h
-26a21b4b82d56089cb9916b992123644 *inst/include/sparsematrix.h
+e3ce67dbe0226eb5ca75cb12d88c0055 *inst/include/sparsematrix.h
 64ecaeaf01db6edb9e41e195b66e1f39 *inst/include/symmetricmatrix.h
 af8af0d4d5d52892def11b0194b98853 *inst/include/templatemacros.h
 e453255e14e21f7626a98e94d01fcf27 *inst/include/threadhelper.h
